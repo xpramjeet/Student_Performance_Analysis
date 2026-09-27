@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Student Attendance</title>
+
+    <style>
+        .error-message {
+    background: #f8d7da;
+    color: #842029;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .form-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .form-box h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #1f3c88;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #1f3c88;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background: #1f3c88;
+        }
+
+        .attendance-btn {
+            background: #555;
+        }
+
+        .students-btn {
+            background: #777;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                margin: 25px auto;
+            }
+
+            .form-box {
+                padding: 22px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+
+    <div class="header">
+
+        <h1>Student Performance Analysis and Management System</h1>
+
+        <p>Attendance Management</p>
+
+    </div>
+
+
+    <!-- Form -->
+
+    <div class="container">
+
+        <div class="form-box">
+
+            <h2>Add Student Attendance</h2>
+            {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+{% endif %}
+
+            <form method="POST">
+
+                <div class="form-group">
+
+                    <label for="student_id">
+                        Select Student
+                    </label>
+
+                    <select name="student_id" id="student_id" required>
+
+                        <option value="">
+                            -- Select Student --
+                        </option>
+
+                        {% for student in students %}
+
+                        <option value="{{ student.id }}">
+                            {{ student.roll_no }} - {{ student.student_name }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="subject">
+                        Subject
+                    </label>
+
+                    <input
+                        type="text"
+                        name="subject"
+                        id="subject"
+                        placeholder="Enter subject"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="total_classes">
+                        Total Classes
+                    </label>
+
+                    <input
+                        type="number"
+                        name="total_classes"
+                        id="total_classes"
+                        min="1"
+                        placeholder="Enter total classes"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="attended_classes">
+                        Attended Classes
+                    </label>
+
+                    <input
+                        type="number"
+                        name="attended_classes"
+                        id="attended_classes"
+                        min="0"
+                        placeholder="Enter attended classes"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="buttons">
+
+                    <button
+                        type="submit"
+                        class="btn save-btn"
+                    >
+                        Save Attendance
+                    </button>
+
+                    <a
+                        href="/attendance"
+                        class="btn attendance-btn"
+                    >
+                        View Attendance
+                    </a>
+
+                    <a
+                        href="/students"
+                        class="btn students-btn"
+                    >
+                        Back to Students
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

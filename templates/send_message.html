@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Send Student Message</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .back {
+            background: white;
+            color: #243f87;
+            padding: 9px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            color: #243f87;
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 18px;
+            margin-bottom: 7px;
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 22px;
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 6px;
+            background: #243f87;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b316b;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <h1>📩 Send Student Message</h1>
+
+    <a href="/dashboard" class="back">
+        ← Dashboard
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Send Message to Student</h2>
+
+        {% if message %}
+            <div class="success">
+                {{ message }}
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+
+        <form method="POST">
+
+            <label>Select Student</label>
+
+            <select name="student_id" required>
+
+                <option value="">
+                    -- Select Student --
+                </option>
+
+                {% for student in students %}
+
+                    <option value="{{ student.id }}">
+
+                        {{ student.student_name }}
+                        - Roll No: {{ student.roll_no }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <label>Message Title</label>
+
+            <input
+                type="text"
+                name="title"
+                placeholder="Enter message title"
+                maxlength="150"
+                required
+            >
+
+
+            <label>Message</label>
+
+            <textarea
+                name="message"
+                placeholder="Write your message here..."
+                required
+            ></textarea>
+
+
+            <button type="submit">
+                📩 Send Message
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

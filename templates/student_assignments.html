@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Assignments</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 20px 40px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 94%;
+            margin: 50px auto;
+        }
+
+        h2 {
+            color: #243f87;
+            margin-bottom: 25px;
+        }
+
+        .table-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #243f87;
+            color: white;
+            padding: 14px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .percentage {
+            font-weight: bold;
+            color: #198754;
+        }
+
+        .submitted {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .pending {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .accepted {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .correction {
+            color: #fd7e14;
+            font-weight: bold;
+        }
+
+        .rejected {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .submit-box {
+            margin-top: 5px;
+        }
+
+        .submit-box input {
+            width: 200px;
+            padding: 7px;
+        }
+
+        .submit-btn {
+            margin-top: 8px;
+            padding: 8px 14px;
+            background: #198754;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .submit-btn:hover {
+            background: #146c43;
+        }
+
+        .feedback-box {
+            margin-top: 8px;
+            padding: 10px;
+            background: #f4f6fa;
+            border-radius: 7px;
+            line-height: 1.5;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .no-record {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #243f87;
+            font-size: 17px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Student Performance Analysis System
+    </div>
+
+    <div class="container">
+
+        <h2>📝 My Assignments</h2>
+
+        <div class="table-box">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Assignment</th>
+                        <th>Subject</th>
+                        <th>Marks</th>
+                        <th>Maximum Marks</th>
+                        <th>Percentage</th>
+                        <th>Assignment Status</th>
+                        <th>File Submission</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for record in assignments %}
+
+                    <tr>
+
+                        <td>
+                            {{ record.title }}
+                        </td>
+
+                        <td>
+                            {{ record.subject }}
+                        </td>
+
+                        <td>
+                            {{ record.marks }}
+                        </td>
+
+                        <td>
+                            {{ record.max_marks }}
+                        </td>
+
+                        <td class="percentage">
+
+                            {% if record.max_marks > 0 %}
+                                {{ "%.2f"|format((record.marks / record.max_marks) * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if record.file_submission_status == "Accepted" %}
+
+                                <span class="accepted">
+                                    ✅ Accepted
+                                </span>
+
+                            {% elif record.file_submission_status == "Needs Correction" %}
+
+                                <span class="correction">
+                                    🔄 Needs Correction
+                                </span>
+
+                            {% elif record.file_submission_status == "Rejected" %}
+
+                                <span class="rejected">
+                                    ❌ Rejected
+                                </span>
+
+                            {% elif record.file_submission_status == "Submitted" %}
+
+                                <span class="submitted">
+                                    📤 Submitted
+                                </span>
+
+                            {% else %}
+
+                                <span class="pending">
+                                    ⏳ Not Submitted
+                                </span>
+
+                                <form
+                                    action="/student-submit-assignment/{{ record.id }}"
+                                    method="POST"
+                                    enctype="multipart/form-data"
+                                    class="submit-box"
+                                >
+
+                                    <input
+                                        type="file"
+                                        name="assignment_file"
+                                        accept=".pdf,.doc,.docx"
+                                        required
+                                    >
+
+                                    <br>
+
+                                    <button
+                                        type="submit"
+                                        class="submit-btn"
+                                    >
+                                        📤 Submit Assignment
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                            {% if record.file_name %}
+
+                                <div class="file-name">
+                                    📄 {{ record.file_name }}
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if record.feedback %}
+
+                                <div class="feedback-box">
+                                    <strong>📝 Admin Feedback:</strong>
+                                    <br><br>
+                                    {{ record.feedback }}
+                                </div>
+
+                            {% else %}
+
+                                <span style="color:#777;">
+                                    No feedback yet.
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="8" class="no-record">
+                            No assignment records found.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <a href="/student-dashboard" class="back">
+            ← Back to Student Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>

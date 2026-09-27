@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Marks</title>
+
+    <style>
+        .error-message {
+    background: #f8d7da;
+    color: #842029;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #1f3c88;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            background: white;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #1f3c88;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button,
+        .back-btn {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: #1f3c88;
+            color: white;
+        }
+
+        button:hover {
+            background: #162d68;
+        }
+
+        .back-btn {
+            background: #666;
+            color: white;
+        }
+
+        .back-btn:hover {
+            background: #555;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 25px auto;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            button,
+            .back-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>Student Performance Analysis and Management System</h1>
+
+        <p>Marks Management</p>
+
+    </div>
+
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2>Add Student Marks</h2>
+            {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+{% endif %}
+
+            <form method="POST">
+
+                <div class="form-group">
+
+                    <label>Select Student</label>
+
+                    <select name="student_id" required>
+
+                        <option value="">
+                            -- Select Student --
+                        </option>
+
+                        {% for student in students %}
+
+                            <option value="{{ student.id }}">
+                                {{ student.roll_no }} - {{ student.student_name }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Subject</label>
+
+                    <input
+                        type="text"
+                        name="subject"
+                        placeholder="Enter subject name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Marks Obtained</label>
+
+                    <input
+                        type="number"
+                        name="marks"
+                        placeholder="Enter marks obtained"
+                        min="0"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Maximum Marks</label>
+
+                    <input
+                        type="number"
+                        name="max_marks"
+                        value="100"
+                        min="1"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="buttons">
+
+                    <button type="submit">
+                        Save Marks
+                    </button>
+
+                    <a href="/marks" class="back-btn">
+                        ← Back to Marks
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

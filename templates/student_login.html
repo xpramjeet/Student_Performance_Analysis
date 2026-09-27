@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Login</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 22px 40px;
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .login-container {
+            width: 420px;
+            margin: 80px auto;
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        h2 {
+            text-align: center;
+            color: #243f87;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #243f87;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 28px;
+            padding: 14px;
+            background: #243f87;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b3270;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            padding: 12px;
+            border-radius: 7px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .admin-link {
+            display: block;
+            text-align: center;
+            margin-top: 22px;
+            color: #243f87;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .admin-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Student Performance Analysis and Management System
+    </div>
+
+    <div class="login-container">
+
+        <h2>🎓 Student Login</h2>
+
+        {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+
+            <label>Username</label>
+            <input
+                type="text"
+                name="username"
+                placeholder="Enter your username"
+                required
+            >
+
+            <label>Password</label>
+            <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                required
+            >
+            <a href="/forgot-password"
+            style="display:block;
+            text-align:center;
+            margin-top:15px;
+            color:#243f87;
+            font-weight:bold;
+            text-decoration:none;">
+            🔐 Forgot Password?
+            </a>
+
+            <button type="submit">
+                Login
+            </button>
+
+        </form>
+
+        <a href="/" class="admin-link">
+            ← Admin Login
+        </a>
+
+    </div>
+
+</body>
+</html>

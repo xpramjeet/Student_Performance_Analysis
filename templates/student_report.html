@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Student Report</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+            color: #333;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 22px 40px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 92%;
+            margin: 35px auto;
+        }
+
+        h2 {
+            color: #243f87;
+            margin-bottom: 25px;
+        }
+
+        .student-info {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .student-info h3 {
+            color: #243f87;
+            margin-top: 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .info-box {
+            background: #f7f8fc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .info-box b {
+            display: block;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            color: #243f87;
+            margin-top: 0;
+            border-bottom: 2px solid #243f87;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: #243f87;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 11px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f5f7fb;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 40px;
+            color: #243f87;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 17px;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 800px) {
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    Student Performance Analysis System
+</div>
+
+<div class="container">
+
+    <h2>📄 My Student Report</h2>
+
+    <!-- Student Details -->
+    <div class="student-info">
+
+        <h3>Student Information</h3>
+
+        <div class="info-grid">
+
+            <div class="info-box">
+                <b>Student Name</b>
+                {{ student.student_name }}
+            </div>
+
+            <div class="info-box">
+                <b>Roll Number</b>
+                {{ student.roll_no }}
+            </div>
+
+            <div class="info-box">
+                <b>Course</b>
+                {{ student.course }}
+            </div>
+
+            <div class="info-box">
+                <b>Semester</b>
+                {{ student.semester }}
+            </div>
+
+            <div class="info-box">
+                <b>Email</b>
+                {{ student.email }}
+            </div>
+
+            <div class="info-box">
+                <b>Phone</b>
+                {{ student.phone }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Theory Marks -->
+    <div class="section">
+
+        <h3>📚 Theory Marks</h3>
+
+        {% if marks %}
+
+        <table>
+
+            <tr>
+                <th>Subject</th>
+                <th>Obtained Marks</th>
+                <th>Maximum Marks</th>
+                <th>Percentage</th>
+            </tr>
+
+            {% for mark in marks %}
+
+            <tr>
+
+                <td>{{ mark.subject }}</td>
+
+                <td>{{ mark.marks }}</td>
+
+                <td>{{ mark.max_marks }}</td>
+
+                <td>
+                    {% if mark.max_marks %}
+                        {{ "%.2f"|format((mark.marks / mark.max_marks) * 100) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            No theory marks available.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Practical -->
+    <div class="section">
+
+        <h3>🧪 Practical Performance</h3>
+
+        {% if practical %}
+
+        <table>
+
+            <tr>
+                <th>Subject</th>
+                <th>Obtained Marks</th>
+                <th>Maximum Marks</th>
+                <th>Percentage</th>
+            </tr>
+
+            {% for item in practical %}
+
+            <tr>
+
+                <td>{{ item.subject }}</td>
+
+                <td>{{ item.marks }}</td>
+
+                <td>{{ item.max_marks }}</td>
+
+                <td>
+                    {% if item.max_marks %}
+                        {{ "%.2f"|format((item.marks / item.max_marks) * 100) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            No practical records available.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Assignments -->
+    <div class="section">
+
+        <h3>📝 Assignments</h3>
+
+        {% if assignments %}
+
+        <table>
+
+            <tr>
+                <th>Title</th>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Maximum</th>
+                <th>Status</th>
+            </tr>
+
+            {% for item in assignments %}
+
+            <tr>
+
+                <td>{{ item.title }}</td>
+
+                <td>{{ item.subject }}</td>
+
+                <td>{{ item.marks }}</td>
+
+                <td>{{ item.max_marks }}</td>
+
+                <td>{{ item.submission_status }}</td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            No assignment records available.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Attendance -->
+    <div class="section">
+
+        <h3>📅 Attendance</h3>
+
+        {% if attendance %}
+
+        <table>
+
+            <tr>
+                <th>Subject</th>
+                <th>Total Classes</th>
+                <th>Attended</th>
+                <th>Attendance</th>
+            </tr>
+
+            {% for item in attendance %}
+
+            <tr>
+
+                <td>{{ item.subject }}</td>
+
+                <td>{{ item.total_classes }}</td>
+
+                <td>{{ item.attended_classes }}</td>
+
+                <td>
+                    {{ "%.2f"|format(item.attendance_percentage) }}%
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            No attendance records available.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Activities -->
+    <div class="section">
+
+        <h3>🏆 Activities</h3>
+
+        {% if activities %}
+
+        <table>
+
+            <tr>
+                <th>Activity</th>
+                <th>Type</th>
+                <th>Performance</th>
+                <th>Remarks</th>
+            </tr>
+
+            {% for item in activities %}
+
+            <tr>
+
+                <td>{{ item.activity_name }}</td>
+
+                <td>{{ item.activity_type }}</td>
+
+                <td>{{ item.performance }}</td>
+
+                <td>{{ item.remarks }}</td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            No activity records available.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Participation -->
+    <div class="section">
+
+        <h3>🎯 Participation & Achievements</h3>
+
+        {% if participation %}
+
+        <table>
+
+            <tr>
+                <th>Event</th>
+                <th>Type</th>
+                <th>Level</th>
+                <th>Achievement</th>
+                <th>Remarks</th>
+            </tr>
+
+            {% for item in participation %}
+
+            <tr>
+
+                <td>{{ item.event_name }}</td>
+
+                <td>{{ item.event_type }}</td>
+
+                <td>{{ item.participation_level }}</td>
+
+                <td>{{ item.achievement }}</td>
+
+                <td>{{ item.remarks }}</td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            No participation records available.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+   <div style="margin-top:30px; margin-bottom:40px;">
+
+    <a href="/student-download-report"
+       style="
+       display:inline-block;
+       background:#243f87;
+       color:white;
+       padding:13px 22px;
+       border-radius:8px;
+       text-decoration:none;
+       font-weight:bold;
+       margin-right:12px;
+       ">
+        📄 Download PDF Report
+    </a>
+
+    <a href="/student-dashboard"
+       style="
+       display:inline-block;
+       color:#243f87;
+       font-weight:bold;
+       text-decoration:none;
+       ">
+        ← Back to Student Dashboard
+    </a>
+
+</div>
+
+</div>
+
+</body>
+</html>

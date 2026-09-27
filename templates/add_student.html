@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Student</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #1f3c88;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #1f3c88;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button,
+        .back-btn {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: #1f3c88;
+            color: white;
+        }
+
+        button:hover {
+            background: #162d68;
+        }
+
+        .back-btn {
+            background: #666;
+            color: white;
+        }
+
+        .back-btn:hover {
+            background: #555;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 25px auto;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            button,
+            .back-btn {
+                text-align: center;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+
+    <div class="header">
+
+        <h1>Student Performance Analysis and Management System</h1>
+
+        <p>Add Student</p>
+
+    </div>
+
+
+    <!-- Form -->
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2>Student Information</h2>
+
+            <form method="POST">
+
+                <div class="form-group">
+                    <label>Roll Number</label>
+                    <input
+                        type="text"
+                        name="roll_no"
+                        placeholder="Enter roll number"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Student Name</label>
+                    <input
+                        type="text"
+                        name="student_name"
+                        placeholder="Enter student name"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Course</label>
+                    <input
+                        type="text"
+                        name="course"
+                        placeholder="Example: BCA"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Semester</label>
+                    <input
+                        type="number"
+                        name="semester"
+                        placeholder="Enter semester"
+                        min="1"
+                        max="8"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter email address"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input
+                        type="tel"
+                        name="phone"
+                        placeholder="Enter phone number"
+                        required
+                    >
+                </div>
+
+
+                <div class="buttons">
+
+                    <button type="submit">
+                        Save Student
+                    </button>
+
+                    <a href="/students" class="back-btn">
+                        ← Back to Students
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

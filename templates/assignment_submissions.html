@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assignment Submissions</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 20px 40px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 96%;
+            margin: 50px auto;
+        }
+
+        h2 {
+            color: #243f87;
+            margin-bottom: 25px;
+        }
+
+        .table-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #243f87;
+            color: white;
+            padding: 14px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .submitted {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .accepted {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .correction {
+            color: #fd7e14;
+            font-weight: bold;
+        }
+
+        .rejected {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .download {
+            display: inline-block;
+            padding: 8px 12px;
+            background: #198754;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .download:hover {
+            background: #146c43;
+        }
+
+        select {
+            width: 180px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 220px;
+            min-height: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
+
+        .save-btn {
+            padding: 9px 14px;
+            background: #243f87;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .save-btn:hover {
+            background: #1b3068;
+        }
+
+        .no-record {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #243f87;
+            font-size: 17px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        .current-feedback {
+            margin-top: 8px;
+            padding: 8px;
+            background: #f4f6fa;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Student Performance Analysis System
+    </div>
+
+    <div class="container">
+
+        <h2>📥 Assignment Submissions</h2>
+
+        <div class="table-box">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Roll No.</th>
+                        <th>Assignment</th>
+                        <th>Subject</th>
+                        <th>File Name</th>
+                        <th>Submitted At</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        <th>Review</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for submission in submissions %}
+
+                    <tr>
+
+                        <td>
+                            {{ submission.student_name }}
+                        </td>
+
+                        <td>
+                            {{ submission.roll_no }}
+                        </td>
+
+                        <td>
+                            {{ submission.assignment_title }}
+                        </td>
+
+                        <td>
+                            {{ submission.subject }}
+                        </td>
+
+                        <td>
+                            {{ submission.file_name }}
+                        </td>
+
+                        <td>
+                            {{ submission.submitted_at }}
+                        </td>
+
+                        <td>
+
+                            {% if submission.status == "Accepted" %}
+
+                                <span class="accepted">
+                                    ✅ Accepted
+                                </span>
+
+                            {% elif submission.status == "Needs Correction" %}
+
+                                <span class="correction">
+                                    🔄 Needs Correction
+                                </span>
+
+                            {% elif submission.status == "Rejected" %}
+
+                                <span class="rejected">
+                                    ❌ Rejected
+                                </span>
+
+                            {% else %}
+
+                                <span class="submitted">
+                                    📤 {{ submission.status }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="/assignment-submission-download/{{ submission.id }}"
+                                class="download"
+                            >
+                                ⬇ Download
+                            </a>
+
+                        </td>
+
+                        <td>
+
+                            <form
+                                action="/assignment-submission-feedback/{{ submission.id }}"
+                                method="POST"
+                            >
+
+                                <select name="status" required>
+
+                                    <option
+                                        value="Accepted"
+                                        {% if submission.status == "Accepted" %}
+                                        selected
+                                        {% endif %}
+                                    >
+                                        Accepted
+                                    </option>
+
+                                    <option
+                                        value="Needs Correction"
+                                        {% if submission.status == "Needs Correction" %}
+                                        selected
+                                        {% endif %}
+                                    >
+                                        Needs Correction
+                                    </option>
+
+                                    <option
+                                        value="Rejected"
+                                        {% if submission.status == "Rejected" %}
+                                        selected
+                                        {% endif %}
+                                    >
+                                        Rejected
+                                    </option>
+
+                                </select>
+
+                                <br><br>
+
+                                <textarea
+                                    name="feedback"
+                                    placeholder="Write feedback..."
+                                >{{ submission.feedback or "" }}</textarea>
+
+                                <br><br>
+
+                                <button
+                                    type="submit"
+                                    class="save-btn"
+                                >
+                                    💾 Save Review
+                                </button>
+
+                            </form>
+
+                            {% if submission.feedback %}
+
+                                <div class="current-feedback">
+                                    <strong>Current Feedback:</strong><br>
+                                    {{ submission.feedback }}
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="9" class="no-record">
+                            No assignment submissions found.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <a href="/dashboard" class="back">
+            ← Back to Admin Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Overall Performance</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 20px 40px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            margin: 45px auto;
+        }
+
+        h2 {
+            color: #243f87;
+            margin-bottom: 25px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            color: #555;
+            margin: 0 0 15px;
+            font-size: 17px;
+        }
+
+        .percentage {
+            font-size: 30px;
+            font-weight: bold;
+            color: #243f87;
+        }
+
+        .summary {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .summary-card h3 {
+            color: #243f87;
+            margin-top: 0;
+        }
+
+        .summary-row {
+            padding: 13px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 17px;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .good {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .average {
+            color: #fd7e14;
+            font-weight: bold;
+        }
+
+        .improvement {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .chart-box {
+            margin-top: 30px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 380px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #243f87;
+            font-size: 17px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                font-size: 22px;
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Student Performance Analysis System
+    </div>
+
+    <div class="container">
+
+        <h2>📊 My Overall Performance</h2>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>📚 Theory</h3>
+                <div class="percentage">
+                    {{ "%.2f"|format(theory_percentage) }}%
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🧪 Practical</h3>
+                <div class="percentage">
+                    {{ "%.2f"|format(practical_percentage) }}%
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📝 Assignment</h3>
+                <div class="percentage">
+                    {{ "%.2f"|format(assignment_percentage) }}%
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📅 Attendance</h3>
+                <div class="percentage">
+                    {{ "%.2f"|format(attendance_percentage) }}%
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="summary">
+
+            <div class="summary-card">
+
+                <h3>Performance Summary</h3>
+
+                <div class="summary-row">
+                    <b>Overall Percentage:</b>
+                    {{ "%.2f"|format(overall_percentage) }}%
+                </div>
+
+                <div class="summary-row">
+                    <b>Grade:</b>
+                    {{ grade }}
+                </div>
+
+                <div class="summary-row">
+                    <b>Status:</b>
+
+                    {% if performance_status == "Good Performance" %}
+
+                        <span class="good">
+                            {{ performance_status }}
+                        </span>
+
+                    {% elif performance_status == "Average Performance" %}
+
+                        <span class="average">
+                            {{ performance_status }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="improvement">
+                            {{ performance_status }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <h3>Improvement Analysis</h3>
+
+                <div class="summary-row">
+                    <b>Weak Area:</b>
+                    {{ weak_area }}
+                </div>
+
+                <div class="summary-row">
+                    <b>Suggestion:</b>
+                    {{ improvement_message }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="chart-box">
+
+            <h3 style="color:#243f87;">
+                Performance Comparison
+            </h3>
+
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+
+        </div>
+
+
+        <a href="/student-dashboard" class="back">
+            ← Back to Student Dashboard
+        </a>
+
+    </div>
+
+
+    <script>
+
+        const ctx = document.getElementById(
+            "performanceChart"
+        );
+
+        new Chart(ctx, {
+
+            type: "bar",
+
+            data: {
+
+                labels: [
+                    "Theory",
+                    "Practical",
+                    "Assignment",
+                    "Attendance"
+                ],
+
+                datasets: [{
+                    label: "Percentage",
+
+                    data: [
+                        {{ theory_percentage }},
+                        {{ practical_percentage }},
+                        {{ assignment_percentage }},
+                        {{ attendance_percentage }}
+                    ],
+
+                    borderWidth: 1
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: "Percentage"
+                        }
+                    }
+
+                }
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>

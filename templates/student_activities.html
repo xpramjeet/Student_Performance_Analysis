@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Activities</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 20px 40px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            margin: 60px auto;
+        }
+
+        h2 {
+            color: #243f87;
+            margin-bottom: 25px;
+        }
+
+        .table-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #243f87;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .no-record {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #243f87;
+            font-size: 17px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Student Performance Analysis System
+    </div>
+
+    <div class="container">
+
+        <h2>🎯 My Activities</h2>
+
+        <div class="table-box">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Activity Name</th>
+                        <th>Activity Type</th>
+                        <th>Performance</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for record in activities %}
+
+                    <tr>
+                        <td>{{ record.activity_name }}</td>
+                        <td>{{ record.activity_type }}</td>
+                        <td>{{ record.performance }}</td>
+                        <td>{{ record.remarks }}</td>
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="4" class="no-record">
+                            No activity records found.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <a href="/student-dashboard" class="back">
+            ← Back to Student Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>

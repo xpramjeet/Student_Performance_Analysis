@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Participation</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+        }
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1f3c88;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d6dbe5;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 25px;
+            width: 100%;
+            padding: 13px;
+            background: #1f3c88;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #17306f;
+        }
+
+        .back {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: #1f3c88;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>
+            Student Performance Analysis and Management System
+        </h1>
+
+    </div>
+
+    <div class="container">
+
+        <h2>
+            Add Participation Record
+        </h2>
+
+        <form method="POST">
+
+            <label>
+                Select Student
+            </label>
+
+            <select name="student_id" required>
+
+                <option value="">
+                    -- Select Student --
+                </option>
+
+                {% for student in students %}
+
+                    <option value="{{ student.id }}">
+
+                        {{ student.roll_no }}
+                        -
+                        {{ student.student_name }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <label>
+                Event Name
+            </label>
+
+            <input
+                type="text"
+                name="event_name"
+                placeholder="Example: Annual Coding Competition"
+                required
+            >
+
+
+            <label>
+                Event Type
+            </label>
+
+            <select name="event_type" required>
+
+                <option value="">
+                    -- Select Event Type --
+                </option>
+
+                <option value="Competition">
+                    Competition
+                </option>
+
+                <option value="Seminar">
+                    Seminar
+                </option>
+
+                <option value="Workshop">
+                    Workshop
+                </option>
+
+                <option value="Hackathon">
+                    Hackathon
+                </option>
+
+                <option value="Cultural Event">
+                    Cultural Event
+                </option>
+
+                <option value="Sports Event">
+                    Sports Event
+                </option>
+
+                <option value="Technical Event">
+                    Technical Event
+                </option>
+
+                <option value="Other">
+                    Other
+                </option>
+
+            </select>
+
+
+            <label>
+                Participation Level
+            </label>
+
+            <select name="participation_level" required>
+
+                <option value="">
+                    -- Select Level --
+                </option>
+
+                <option value="College">
+                    College
+                </option>
+
+                <option value="University">
+                    University
+                </option>
+
+                <option value="State">
+                    State
+                </option>
+
+                <option value="National">
+                    National
+                </option>
+
+                <option value="International">
+                    International
+                </option>
+
+            </select>
+
+
+            <label>
+                Achievement
+            </label>
+
+            <select name="achievement" required>
+
+                <option value="Participant">
+                    Participant
+                </option>
+
+                <option value="Certificate">
+                    Certificate
+                </option>
+
+                <option value="Winner">
+                    Winner
+                </option>
+
+                <option value="Runner-up">
+                    Runner-up
+                </option>
+
+                <option value="Finalist">
+                    Finalist
+                </option>
+
+                <option value="Other">
+                    Other
+                </option>
+
+            </select>
+
+
+            <label>
+                Remarks
+            </label>
+
+            <textarea
+                name="remarks"
+                placeholder="Enter additional remarks"
+            ></textarea>
+
+
+            <button type="submit">
+                Save Participation
+            </button>
+
+        </form>
+
+        <a href="/participation" class="back">
+            ← View Participation Records
+        </a>
+
+        <a href="/dashboard" class="back">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Participation Records</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 20px 40px;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 85%;
+            margin: 85px auto 0;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: #243f87;
+            font-size: 32px;
+        }
+
+        .add-btn {
+            background: #198754;
+            color: white;
+            padding: 16px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .table-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #243f87;
+            color: white;
+            padding: 16px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Action column */
+        .action-cell {
+            white-space: nowrap;
+            min-width: 170px;
+        }
+
+        /* Edit Button */
+        .edit-btn {
+            background: #0d6efd;
+            color: white;
+            padding: 9px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 15px;
+        }
+
+        .edit-btn:hover {
+            background: #0b5ed7;
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            padding: 9px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 15px;
+        }
+
+        .delete-btn:hover {
+            background: #bb2d3b;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #243f87;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        Student Performance Analysis and Management System
+    </div>
+
+
+    <div class="container">
+
+        <!-- Page Heading -->
+        <div class="top">
+
+            <h2>Participation Records</h2>
+
+            <a href="/add-participation" class="add-btn">
+                ➕ Add Participation
+            </a>
+
+        </div>
+
+
+        <!-- Table -->
+        <div class="table-box">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>Event</th>
+                        <th>Event Type</th>
+                        <th>Level</th>
+                        <th>Achievement</th>
+                        <th>Remarks</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for record in participation %}
+
+                    <tr>
+
+                        <td>
+                            {{ record.roll_no }}
+                        </td>
+
+                        <td>
+                            {{ record.student_name }}
+                        </td>
+
+                        <td>
+                            {{ record.event_name }}
+                        </td>
+
+                        <td>
+                            {{ record.event_type }}
+                        </td>
+
+                        <td>
+                            {{ record.participation_level }}
+                        </td>
+
+                        <td>
+                            {{ record.achievement }}
+                        </td>
+
+                        <td>
+                            {{ record.remarks }}
+                        </td>
+
+                        <td class="action-cell">
+
+                            <a
+                                href="/edit-participation/{{ record.id }}"
+                                class="edit-btn"
+                            >
+                                Edit
+                            </a>
+
+                            <a
+                                href="/delete-participation/{{ record.id }}"
+                                class="delete-btn"
+                                onclick="return confirm('Are you sure you want to delete this participation record?');"
+                            >
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="8"
+                            style="text-align: center;"
+                        >
+                            No participation records found.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- Back Button -->
+        <a href="/dashboard" class="back">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>

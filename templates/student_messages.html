@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Messages</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .back-btn {
+            background: white;
+            color: #243f87;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            background: #e9ecef;
+        }
+
+        /* Container */
+        .container {
+            width: 92%;
+            max-width: 1000px;
+            margin: 30px auto;
+        }
+
+        /* Page title */
+        .page-title {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .page-title h2 {
+            margin: 0 0 8px;
+            color: #243f87;
+        }
+
+        .page-title p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        /* Messages */
+        .message-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            transition: 0.2s;
+        }
+
+        .message-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 16px rgba(0,0,0,0.12);
+        }
+
+        .message-card.unread {
+            border-left: 5px solid #dc3545;
+        }
+
+        .message-card.read {
+            border-left: 5px solid #198754;
+        }
+
+        .message-card h2 {
+            margin: 0 0 10px;
+            color: #243f87;
+            font-size: 21px;
+        }
+
+        .message-text {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+
+        .date {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .status {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .unread-status {
+            color: #dc3545;
+        }
+
+        .read-status {
+            color: #198754;
+        }
+
+        .view-btn {
+            display: inline-block;
+            background: #243f87;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .view-btn:hover {
+            background: #1b316b;
+        }
+
+        /* No messages */
+        .no-messages {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .no-messages h2 {
+            color: #243f87;
+        }
+
+        .no-messages p {
+            color: #666;
+        }
+
+        /* Footer */
+        footer {
+            background: #243f87;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            margin-top: 40px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .message-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+
+        <h1>📩 Student Messages</h1>
+
+        <a href="/student-dashboard" class="back-btn">
+            ← Dashboard
+        </a>
+
+    </div>
+
+
+    <!-- MAIN -->
+    <div class="container">
+
+        <!-- PAGE TITLE -->
+        <div class="page-title">
+
+            <h2>📢 Messages & Notices</h2>
+
+            <p>
+                View messages and notices sent by the administrator.
+            </p>
+
+            {% if unread_count > 0 %}
+
+                <p style="color:#dc3545; font-weight:bold;">
+                    🔴 {{ unread_count }}
+                    Unread Message{% if unread_count > 1 %}s{% endif %}
+                </p>
+
+            {% else %}
+
+                <p style="color:#198754; font-weight:bold;">
+                    ✅ No Unread Messages
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- MESSAGES -->
+
+        {% if messages %}
+
+            {% for msg in messages %}
+
+                <div class="message-card
+                    {% if msg.is_read %}
+                        read
+                    {% else %}
+                        unread
+                    {% endif %}
+                ">
+
+                    <h2>
+                        📢 {{ msg.title }}
+                    </h2>
+
+                    <div class="message-text">
+                        {{ msg.message }}
+                    </div>
+
+                    <div class="date">
+                        📅 {{ msg.created_at }}
+                    </div>
+
+
+                    {% if msg.is_read %}
+
+                        <div class="status read-status">
+                            ✓ Read
+                        </div>
+
+                    {% else %}
+
+                        <div class="status unread-status">
+                            🔴 Unread
+                        </div>
+
+                    {% endif %}
+
+
+                    <br>
+
+                    <a
+                        href="/student-message/{{ msg.id }}"
+                        class="view-btn"
+                    >
+                        View Message
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="no-messages">
+
+                <h2>📭 No Messages</h2>
+
+                <p>
+                    You currently have no messages or notices from the administrator.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer>
+        Student Performance Analysis & Management System
+    </footer>
+
+</body>
+
+</html>

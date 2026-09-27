@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>View Message</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .title {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .date {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 15px;
+        }
+
+        .message {
+            font-size: 17px;
+            line-height: 1.7;
+            color: #374151;
+            white-space: pre-wrap;
+        }
+
+        .status {
+            margin-top: 25px;
+            padding: 10px 15px;
+            background: #ecfdf5;
+            color: #047857;
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 11px 20px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+        }
+
+        .back-btn:hover {
+            background: #1d4ed8;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                margin: 20px auto;
+            }
+
+            .message-box {
+                padding: 20px;
+            }
+
+            .title {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="/student-messages" class="back">
+        ← Back to Messages
+    </a>
+
+    <div class="message-box">
+
+        <h1 class="title">
+            📢 {{ msg.title }}
+        </h1>
+
+        <div class="date">
+            📅 {{ msg.created_at }}
+        </div>
+
+        <div class="message">
+            {{ msg.message }}
+        </div>
+
+        <div class="status">
+            ✓ Message Read
+        </div>
+
+        <br>
+
+        <a href="/student-messages" class="back-btn">
+            ← Back to Messages
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

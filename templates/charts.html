@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Charts & Analytics</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 18px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .back {
+            background: white;
+            color: #243f87;
+            padding: 9px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 30px auto;
+        }
+
+        .title {
+            color: #243f87;
+            margin-bottom: 20px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .chart-card h2 {
+            margin-top: 0;
+            color: #243f87;
+            font-size: 20px;
+        }
+
+        .chart-box {
+            position: relative;
+            height: 350px;
+        }
+
+        footer {
+            background: #243f87;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 900px) {
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- HEADER -->
+
+<div class="header">
+
+    <h1>
+        📊 Charts & Analytics
+    </h1>
+
+    <a href="/dashboard" class="back">
+        ← Dashboard
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <h2 class="title">
+        Student Performance Analysis
+    </h2>
+
+
+    <div class="chart-grid">
+
+
+        <!-- PERFORMANCE CHART -->
+
+        <div class="chart-card">
+
+            <h2>
+                📈 Student Performance
+            </h2>
+
+            <div class="chart-box">
+
+                <canvas id="performanceChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- ATTENDANCE CHART -->
+
+        <div class="chart-card">
+
+            <h2>
+                📅 Student Attendance
+            </h2>
+
+            <div class="chart-box">
+
+                <canvas id="attendanceChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- THEORY MARKS -->
+
+        <div class="chart-card">
+
+            <h2>
+                📚 Theory Marks
+            </h2>
+
+            <div class="chart-box">
+
+                <canvas id="marksChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- PRACTICAL MARKS -->
+
+        <div class="chart-card">
+
+            <h2>
+                🧪 Practical Performance
+            </h2>
+
+            <div class="chart-box">
+
+                <canvas id="practicalChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<footer>
+
+    Student Performance Analysis & Management System
+
+</footer>
+
+
+<script>
+
+    /* ================= PERFORMANCE ================= */
+
+    const performanceLabels =
+        {{ performance_labels | default([]) | tojson }};
+
+    const performanceValues =
+        {{ performance_values | default([]) | tojson }};
+
+
+    new Chart(
+        document.getElementById("performanceChart"),
+        {
+            type: "bar",
+
+            data: {
+
+                labels: performanceLabels,
+
+                datasets: [
+                    {
+                        label: "Performance %",
+                        data: performanceValues
+                    }
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /* ================= ATTENDANCE ================= */
+
+    const attendanceLabels =
+        {{ attendance_labels | default([]) | tojson }};
+
+    const attendanceValues =
+        {{ attendance_values | default([]) | tojson }};
+
+
+    new Chart(
+        document.getElementById("attendanceChart"),
+        {
+            type: "bar",
+
+            data: {
+
+                labels: attendanceLabels,
+
+                datasets: [
+                    {
+                        label: "Attendance %",
+                        data: attendanceValues
+                    }
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /* ================= THEORY MARKS ================= */
+
+    const marksLabels =
+        {{ marks_labels | default([]) | tojson }};
+
+    const marksValues =
+        {{ marks_values | default([]) | tojson }};
+
+
+    new Chart(
+        document.getElementById("marksChart"),
+        {
+            type: "bar",
+
+            data: {
+
+                labels: marksLabels,
+
+                datasets: [
+                    {
+                        label: "Marks",
+                        data: marksValues
+                    }
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+                        beginAtZero: true
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /* ================= PRACTICAL ================= */
+
+    const practicalLabels =
+        {{ practical_labels | default([]) | tojson }};
+
+    const practicalValues =
+        {{ practical_values | default([]) | tojson }};
+
+
+    new Chart(
+        document.getElementById("practicalChart"),
+        {
+            type: "bar",
+
+            data: {
+
+                labels: practicalLabels,
+
+                datasets: [
+                    {
+                        label: "Practical Marks",
+                        data: practicalValues
+                    }
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+                        beginAtZero: true
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+</script>
+
+
+</body>
+</html>

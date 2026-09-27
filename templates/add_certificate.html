@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Certificate</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 18px 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 700px;
+            margin: 40px auto;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #243f87;
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        select,
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 12px;
+            background: #243f87;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b316b;
+        }
+
+        .success {
+            background: #d1e7dd;
+            color: #0f5132;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #243f87;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🎓 Certificate Management</h1>
+    </div>
+
+    <div class="container">
+
+        <div class="box">
+
+            <h2>📜 Upload Student Certificate</h2>
+
+            {% if message %}
+                <div class="success">
+                    ✅ {{ message }}
+                </div>
+            {% endif %}
+
+            {% if error %}
+                <div class="error">
+                    ❌ {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="POST"
+                  enctype="multipart/form-data">
+
+                <label>
+                    Select Student
+                </label>
+
+                <select name="student_id" required>
+
+                    <option value="">
+                        -- Select Student --
+                    </option>
+
+                    {% for student in students %}
+
+                        <option value="{{ student.id }}">
+                            {{ student.student_name }}
+                            - Roll No. {{ student.roll_no }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <label>
+                    Certificate Title
+                </label>
+
+                <input
+                    type="text"
+                    name="certificate_title"
+                    placeholder="Example: Python Certificate"
+                    required
+                >
+
+
+                <label>
+                    Select Certificate PDF
+                </label>
+
+                <input
+                    type="file"
+                    name="certificate_file"
+                    accept=".pdf,application/pdf"
+                    required
+                >
+
+
+                <button type="submit">
+                    📤 Upload Certificate
+                </button>
+
+            </form>
+
+            <a href="/dashboard" class="back">
+                ← Back to Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
