@@ -1,0 +1,6 @@
+Flask
+mysql-connector-python
+reportlab
+openpyxl
+requests
+python-dotenv
