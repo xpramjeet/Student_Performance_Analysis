@@ -214,6 +214,104 @@ def student_certificate_download(certificate_id):
         as_attachment=True,
         download_name=certificate["file_name"]
     )
+@app.route("/student-register", methods=["GET", "POST"])
+def student_register():
+
+    message = None
+    error = None
+
+    if request.method == "POST":
+
+        roll_no = request.form["roll_no"].strip()
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+
+        if not roll_no or not username or not password or not confirm_password:
+            error = "All fields are required."
+
+        elif password != confirm_password:
+            error = "Passwords do not match."
+
+        elif len(password) < 6:
+            error = "Password must be at least 6 characters."
+
+        else:
+
+            db = get_db_connection()
+            cursor = db.cursor(dictionary=True)
+
+            # Check registered student by roll number
+            cursor.execute("""
+                SELECT id, roll_no, student_name
+                FROM students
+                WHERE roll_no = %s
+            """, (roll_no,))
+
+            student = cursor.fetchone()
+
+            if not student:
+                error = "No student found with this registration / roll number."
+
+            else:
+
+                # Check whether account already exists
+                cursor.execute("""
+                    SELECT id
+                    FROM student_users
+                    WHERE student_id = %s
+                """, (student["id"],))
+
+                existing_account = cursor.fetchone()
+
+                if existing_account:
+                    error = "An account already exists for this student."
+
+                else:
+
+                    # Check username availability
+                    cursor.execute("""
+                        SELECT id
+                        FROM student_users
+                        WHERE username = %s
+                    """, (username,))
+
+                    existing_username = cursor.fetchone()
+
+                    if existing_username:
+                        error = "Username already exists. Please choose another username."
+
+                    else:
+
+                        hashed_password = generate_password_hash(password)
+
+                        cursor.execute("""
+                            INSERT INTO student_users
+                            (student_id, username, password)
+                            VALUES (%s, %s, %s)
+                        """, (
+                            student["id"],
+                            username,
+                            hashed_password
+                        ))
+
+                        db.commit()
+
+                        message = (
+                            "Account created successfully. "
+                            "You can now login using your username and password."
+                        )
+
+            cursor.close()
+            db.close()
+
+    return render_template(
+        "student_register.html",
+        message=message,
+        error=error
+    )
+
+
 
 @app.route("/student-login", methods=["GET", "POST"])
 def student_login():
