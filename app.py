@@ -1,13 +1,16 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, session
 from dotenv import load_dotenv
+from flask import send_file
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from io import BytesIO
 import os
 
 load_dotenv()
 import mysql.connector
 import io
 import random
-import requests
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, session, send_file
 from flask import Flask, render_template, request, redirect, session, send_file
@@ -20,10 +23,11 @@ app.secret_key = "student_performance_secret_key"
 def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
-        port=3306,
+        port=int(os.getenv("DB_PORT", "3306")),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
+        database=os.getenv("DB_NAME"),
+        ssl_disabled=False
     )
 
 
@@ -261,10 +265,7 @@ def student_login():
 
     return render_template("student_login.html")
 
-    
-@app.route("/forgot-password")
-def forgot_password():
-    return render_template("forgot_password.html")
+
     
 @app.route("/student-dashboard")
 def student_dashboard():
@@ -1370,6 +1371,170 @@ def student_download_report():
         download_name="Student_Performance_Report.pdf",
         mimetype="application/pdf"
     )
+    
+@app.route("/download-excel/<int:student_id>")
+def download_excel(student_id):
+
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            students.roll_no,
+            students.student_name,
+            marks.subject,
+            marks.marks,
+            marks.max_marks
+        FROM students
+        JOIN marks
+        ON students.id = marks.student_id
+        WHERE students.id = %s
+        ORDER BY marks.subject
+    """, (student_id,))
+
+    report_data = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    if not report_data:
+        return "No marks found for this student."
+
+    total_marks = sum(row["marks"] for row in report_data)
+    max_marks = sum(row["max_marks"] for row in report_data)
+
+    percentage = 0
+
+    if max_marks > 0:
+        percentage = (total_marks / max_marks) * 100
+
+    if percentage >= 90:
+        grade = "A+"
+    elif percentage >= 80:
+        grade = "A"
+    elif percentage >= 70:
+        grade = "B"
+    elif percentage >= 60:
+        grade = "C"
+    elif percentage >= 50:
+        grade = "D"
+    else:
+        grade = "F"
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Student Report"
+
+    sheet["A1"] = "STUDENT PERFORMANCE REPORT"
+    sheet["A1"].font = Font(bold=True, size=16)
+
+    sheet.merge_cells("A1:D1")
+    sheet["A1"].alignment = Alignment(horizontal="center")
+
+    sheet["A3"] = "Student Name"
+    sheet["B3"] = report_data[0]["student_name"]
+
+    sheet["A4"] = "Roll Number"
+    sheet["B4"] = report_data[0]["roll_no"]
+
+    sheet["A6"] = "Subject"
+    sheet["B6"] = "Marks Obtained"
+    sheet["C6"] = "Maximum Marks"
+    sheet["D6"] = "Percentage"
+
+    for cell in sheet[6]:
+        cell.font = Font(bold=True)
+        cell.alignment = Alignment(horizontal="center")
+
+    row_number = 7
+
+    for row in report_data:
+
+        sheet.cell(row=row_number, column=1, value=row["subject"])
+        sheet.cell(row=row_number, column=2, value=row["marks"])
+        sheet.cell(row=row_number, column=3, value=row["max_marks"])
+
+        subject_percentage = 0
+
+        if row["max_marks"] > 0:
+            subject_percentage = (
+                row["marks"] / row["max_marks"]
+            ) * 100
+
+        sheet.cell(
+            row=row_number,
+            column=4,
+            value=round(subject_percentage, 2)
+        )
+
+        row_number += 1
+
+    summary_row = row_number + 1
+
+    sheet.cell(
+        row=summary_row,
+        column=1,
+        value="Total Marks"
+    )
+
+    sheet.cell(
+        row=summary_row,
+        column=2,
+        value=total_marks
+    )
+
+    sheet.cell(
+        row=summary_row,
+        column=3,
+        value=max_marks
+    )
+
+    sheet.cell(
+        row=summary_row + 1,
+        column=1,
+        value="Overall Percentage"
+    )
+
+    sheet.cell(
+        row=summary_row + 1,
+        column=2,
+        value=round(percentage, 2)
+    )
+
+    sheet.cell(
+        row=summary_row + 2,
+        column=1,
+        value="Grade"
+    )
+
+    sheet.cell(
+        row=summary_row + 2,
+        column=2,
+        value=grade
+    )
+
+    for row in range(summary_row, summary_row + 3):
+        sheet.cell(row=row, column=1).font = Font(bold=True)
+
+    sheet.column_dimensions["A"].width = 25
+    sheet.column_dimensions["B"].width = 20
+    sheet.column_dimensions["C"].width = 20
+    sheet.column_dimensions["D"].width = 18
+
+    excel_buffer = io.BytesIO()
+
+    workbook.save(excel_buffer)
+    excel_buffer.seek(0)
+
+    return send_file(
+        excel_buffer,
+        as_attachment=True,
+        download_name=f"{report_data[0]['student_name']}_Report.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 @app.route("/student-logout")
 def student_logout():
@@ -1955,27 +2120,46 @@ def dashboard():
 
     total_students = cursor.fetchone()["total_students"]
 
+   # =========================
+    # RECENT STUDENTS
+    # =========================
 
+    cursor.execute("""
+    SELECT
+        id,
+        roll_no,
+        student_name,
+        course,
+        semester
+    FROM students
+    ORDER BY id DESC
+    LIMIT 5
+""")
+    
+    
+    recent_students = cursor.fetchall()
+    print("RECENT STUDENTS:", recent_students)
+    
     # =========================
     # AVERAGE THEORY PERFORMANCE
     # =========================
 
     cursor.execute("""
-        SELECT
-            AVG(total_marks / max_marks * 100) AS average_percentage
-        FROM (
-            SELECT
-                student_id,
-                SUM(marks) AS total_marks,
-                SUM(max_marks) AS max_marks
-            FROM marks
-            GROUP BY student_id
-        ) AS performance
-    """)
-
+                    SELECT
+                    AVG(student_percentage) AS average_percentage
+                    FROM (
+                    SELECT
+                    student_id,
+                    (SUM(marks) / SUM(max_marks)) * 100 AS student_percentage
+                    FROM marks
+                    GROUP BY student_id
+                    ) AS performance
+                    """)
     result = cursor.fetchone()
 
-    average_percentage = result["average_percentage"] or 0
+    average_percentage = float(
+    result["average_percentage"] or 0
+)
 
 
     # =========================
@@ -2075,6 +2259,29 @@ def dashboard():
 
 
     # =========================
+    # LOW ATTENDANCE STUDENT LIST
+    # =========================
+
+    cursor.execute("""
+        SELECT
+            students.student_name,
+            students.roll_no,
+            AVG(attendance.attendance_percentage) AS avg_attendance
+        FROM students
+        JOIN attendance
+        ON students.id = attendance.student_id
+        GROUP BY
+            students.id,
+            students.student_name,
+            students.roll_no
+        HAVING AVG(attendance.attendance_percentage) < 75
+        ORDER BY avg_attendance ASC
+    """)
+
+    low_attendance_list = cursor.fetchall()
+
+
+    # =========================
     # TOP PERFORMER
     # =========================
 
@@ -2108,7 +2315,6 @@ def dashboard():
             2
         )
 
-        # IMPORTANT FIX
         top_performer["percentage"] = top_performer_percentage
 
     else:
@@ -2150,12 +2356,66 @@ def dashboard():
             2
         )
 
-        # IMPORTANT FIX
         needs_improvement["percentage"] = needs_improvement_percentage
 
     else:
 
         needs_improvement_percentage = 0
+
+
+    # =========================
+    # PERFORMANCE WARNING LIST
+    # =========================
+
+    cursor.execute("""
+        SELECT
+            students.student_name,
+            students.roll_no,
+            SUM(marks.marks) AS total_marks,
+            SUM(marks.max_marks) AS max_marks
+        FROM students
+        JOIN marks
+        ON students.id = marks.student_id
+        GROUP BY
+            students.id,
+            students.student_name,
+            students.roll_no
+        ORDER BY
+            (SUM(marks.marks) / SUM(marks.max_marks)) ASC
+    """)
+
+    performance_warning_data = cursor.fetchall()
+
+    performance_warning_list = []
+
+    for student in performance_warning_data:
+
+        total_marks = float(student["total_marks"] or 0)
+        max_marks = float(student["max_marks"] or 0)
+
+        if max_marks > 0:
+            percentage = (total_marks / max_marks) * 100
+        else:
+            percentage = 0
+
+        if percentage < 50:
+            status = "Critical"
+
+        elif percentage < 60:
+            status = "Needs Improvement"
+
+        elif percentage < 75:
+            status = "Average"
+
+        else:
+            status = "Good"
+
+        performance_warning_list.append({
+            "student_name": student["student_name"],
+            "roll_no": student["roll_no"],
+            "percentage": round(percentage, 2),
+            "status": status
+        })
 
 
     # =========================
@@ -2255,12 +2515,13 @@ def dashboard():
     # =========================
 
     return render_template(
-
         "dashboard.html",
 
         total_students=total_students,
 
-        average_percentage=average_percentage,
+         recent_students=recent_students,
+
+         average_percentage=average_percentage,
 
         average_attendance=average_attendance,
 
@@ -2276,6 +2537,8 @@ def dashboard():
 
         low_attendance_students=low_attendance_students,
 
+        low_attendance_list=low_attendance_list,
+
         performance_names=performance_names,
 
         performance_values=performance_values,
@@ -2290,8 +2553,12 @@ def dashboard():
 
         needs_improvement=needs_improvement,
 
-        needs_improvement_percentage=needs_improvement_percentage
-    )
+        needs_improvement_percentage=needs_improvement_percentage,
+
+        performance_warning_list=performance_warning_list
+)
+
+
 # =========================
 # ADD STUDENT
 # =========================
@@ -2300,6 +2567,7 @@ def dashboard():
 def add_student():
     if "user_id" not in session:
         return redirect("/")
+
     if request.method == "POST":
 
         roll_no = request.form["roll_no"]
@@ -2337,43 +2605,74 @@ def add_student():
 
     return render_template("add_student.html")
 
-# =========================
-# STUDENT LIST + SEARCH
-# =========================
-
 @app.route("/students")
 def students():
     if "user_id" not in session:
         return redirect("/")
+
     search = request.args.get("search", "").strip()
+    course = request.args.get("course", "").strip()
+    semester = request.args.get("semester", "").strip()
 
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
-    if search:
-
-        query = """
+    query = """
         SELECT *
         FROM students
-        WHERE student_name LIKE %s
-           OR roll_no LIKE %s
-        ORDER BY id DESC
+        WHERE 1=1
+    """
+
+    params = []
+
+    # Search by name or roll number
+    if search:
+        query += """
+            AND (
+                student_name LIKE %s
+                OR roll_no LIKE %s
+            )
         """
 
         search_value = "%" + search + "%"
+        params.extend([search_value, search_value])
 
-        cursor.execute(
-            query,
-            (search_value, search_value)
-        )
+    # Filter by course
+    if course:
+        query += " AND course = %s"
+        params.append(course)
 
-    else:
+    # Filter by semester
+    if semester:
+        query += " AND semester = %s"
+        params.append(semester)
 
-        cursor.execute(
-            "SELECT * FROM students ORDER BY id DESC"
-        )
+    query += " ORDER BY id DESC"
 
+    cursor.execute(query, tuple(params))
     student_data = cursor.fetchall()
+
+    # Get courses for dropdown
+    cursor.execute("""
+        SELECT DISTINCT course
+        FROM students
+        WHERE course IS NOT NULL
+          AND course != ''
+        ORDER BY course
+    """)
+
+    courses = cursor.fetchall()
+
+    # Get semesters for dropdown
+    cursor.execute("""
+        SELECT DISTINCT semester
+        FROM students
+        WHERE semester IS NOT NULL
+          AND semester != ''
+        ORDER BY semester
+    """)
+
+    semesters = cursor.fetchall()
 
     cursor.close()
     db.close()
@@ -2381,14 +2680,12 @@ def students():
     return render_template(
         "students.html",
         students=student_data,
-        search=search
+        search=search,
+        course=course,
+        semester=semester,
+        courses=courses,
+        semesters=semesters
     )
-
-
-# =========================
-# EDIT STUDENT
-# =========================
-
 @app.route("/edit-student/<int:id>", methods=["GET", "POST"])
 def edit_student(id):
     if "user_id" not in session:
@@ -3938,81 +4235,65 @@ def performance():
             performance_data,
             key=lambda student: student["percentage"]
         )
-
-
-    # =========================
-    # NEEDS IMPROVEMENT
-    # =========================
-
-    needs_improvement = None
-
-    if performance_data:
-
-        needs_improvement = min(
-            performance_data,
-            key=lambda student: student["percentage"]
-        )
-
-
-    # =========================
-    # WEAK SUBJECT ANALYSIS
-    # =========================
-
-    cursor.execute("""
-        SELECT
-            students.roll_no,
-            students.student_name,
-            marks.subject,
-            marks.marks,
-            marks.max_marks
-        FROM students
-        JOIN marks
-        ON students.id = marks.student_id
-        ORDER BY students.student_name,
-                 marks.subject
-    """)
-
-    subject_data = cursor.fetchall()
-
-
-    for subject in subject_data:
-
-        if subject["max_marks"] > 0:
-
-            subject["percentage"] = (
-                subject["marks"] /
-                subject["max_marks"]
-            ) * 100
-
-        else:
-
-            subject["percentage"] = 0
-
-
-    weak_subjects = [
-        subject
-        for subject in subject_data
-        if subject["percentage"] < 50
-    ]
-
-
-    cursor.close()
-    db.close()
-
-
-    return render_template(
-        "performance.html",
-
-        performance=performance_data,
-
-        top_performer=top_performer,
-
-        needs_improvement=needs_improvement,
-
-        weak_subjects=weak_subjects,
-
-        search=search
+        needs_improvement = cursor.fetchone()
+        if needs_improvement:
+            needs_improvement_percentage = round(
+        (
+            needs_improvement["total_marks"]
+            / needs_improvement["max_marks"]
+        ) * 100,
+        2
     )
+            needs_improvement["percentage"] = needs_improvement_percentage
+        else:
+            needs_improvement_percentage = 0
+            
+            # PERFORMANCE WARNING LIST
+            cursor.execute("""
+                           SELECT
+                           students.student_name,
+                           students.roll_no,
+                           SUM(marks.marks) AS total_marks,
+                           SUM(marks.max_marks) AS max_marks
+                           FROM students
+                           JOIN marks
+                           ON students.id = marks.student_id
+                           GROUP BY
+                           students.id,
+                           students.student_name,
+                           students.roll_no
+                           ORDER BY
+                           (SUM(marks.marks) / SUM(marks.max_marks)) ASC
+                           """)
+            performance_warning_data = cursor.fetchall()
+
+            performance_warning_list = []
+
+            for student in performance_warning_data:
+                total_marks = float(student["total_marks"] or 0)
+                max_marks = float(student["max_marks"] or 0)
+                if max_marks > 0:
+                    percentage = (total_marks / max_marks) * 100
+    else:
+        percentage = 0
+
+    if percentage < 50:
+        status = "Critical"
+    elif percentage < 60:
+        status = "Needs Improvement"
+    elif percentage < 75:
+        status = "Average"
+    else:
+        status = "Good"
+
+    performance_warning_list.append({
+        "student_name": student["student_name"],
+        "roll_no": student["roll_no"],
+        "percentage": round(percentage, 2),
+        "status": status
+    })
+    
+    
 # =========================
 # =========================
 # STUDENT REPORT
@@ -4128,18 +4409,23 @@ def report():
 # =========================
 # PERFORMANCE CHARTS
 # =========================
+# =========================
+# PERFORMANCE CHARTS
+# =========================
 
 @app.route("/charts")
 def charts():
-    if "user_id" not in session:
-        return redirect("/")
+
     if "user_id" not in session:
         return redirect("/")
 
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
-    # Student Performance Data
+    # =========================
+    # STUDENT PERFORMANCE
+    # =========================
+
     cursor.execute("""
         SELECT
             students.student_name,
@@ -4159,25 +4445,23 @@ def charts():
 
     for student in performance_data:
 
-        student_names.append(
-            student["student_name"]
-        )
+        student_names.append(student["student_name"])
 
-        if student["max_marks"] > 0:
+        total_marks = float(student["total_marks"] or 0)
+        max_marks = float(student["max_marks"] or 0)
 
-            percentage = (
-                student["total_marks"] /
-                student["max_marks"]
-            ) * 100
-
+        if max_marks > 0:
+            percentage = (total_marks / max_marks) * 100
         else:
             percentage = 0
 
-        percentages.append(
-            round(percentage, 2)
-        )
+        percentages.append(round(percentage, 2))
 
-    # Attendance Data
+
+    # =========================
+    # ATTENDANCE
+    # =========================
+
     cursor.execute("""
         SELECT
             students.student_name,
@@ -4210,17 +4494,96 @@ def charts():
             )
         )
 
+
+    # =========================
+    # THEORY MARKS
+    # =========================
+
+    cursor.execute("""
+        SELECT
+            students.student_name,
+            SUM(marks.marks) AS total_marks
+        FROM students
+        JOIN marks
+        ON students.id = marks.student_id
+        GROUP BY students.id, students.student_name
+        ORDER BY students.student_name
+    """)
+
+    marks_data = cursor.fetchall()
+
+    marks_labels = []
+    marks_values = []
+
+    for student in marks_data:
+
+        marks_labels.append(
+            student["student_name"]
+        )
+
+        marks_values.append(
+            float(student["total_marks"] or 0)
+        )
+
+
+    # =========================
+    # PRACTICAL MARKS
+    # =========================
+
+    cursor.execute("""
+        SELECT
+            students.student_name,
+            SUM(practical.marks) AS total_marks
+        FROM students
+        JOIN practical
+        ON students.id = practical.student_id
+        GROUP BY students.id, students.student_name
+        ORDER BY students.student_name
+    """)
+
+    practical_data = cursor.fetchall()
+
+    practical_labels = []
+    practical_values = []
+
+    for student in practical_data:
+
+        practical_labels.append(
+            student["student_name"]
+        )
+
+        practical_values.append(
+            float(student["total_marks"] or 0)
+        )
+
+
+    # =========================
+    # CLOSE DATABASE
+    # =========================
+
     cursor.close()
     db.close()
 
+
+    # =========================
+    # SEND DATA TO TEMPLATE
+    # =========================
+
     return render_template(
         "charts.html",
+
         student_names=student_names,
         percentages=percentages,
+
         attendance_names=attendance_names,
-        attendance_values=attendance_values
+        attendance_values=attendance_values,
+
+        marks_labels=marks_labels,
+        marks_values=marks_values,
+
+        practical_labels=practical_labels,
+        practical_values=practical_values
     )
-    
 # =========================
 # RUN APPLICATION
 # =========================
@@ -4568,223 +4931,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 
-
-@app.route("/download-excel/<int:student_id>")
-def download_excel(student_id):
-
-    if "user_id" not in session:
-        return redirect("/")
-
-    db = get_db_connection()
-    cursor = db.cursor(dictionary=True)
-
-    cursor.execute("""
-        SELECT
-            students.roll_no,
-            students.student_name,
-            marks.subject,
-            marks.marks,
-            marks.max_marks
-        FROM students
-        JOIN marks
-        ON students.id = marks.student_id
-        WHERE students.id = %s
-        ORDER BY marks.subject
-    """, (student_id,))
-
-    report_data = cursor.fetchall()
-
-    cursor.close()
-    db.close()
-
-    if not report_data:
-        return "No marks found for this student."
-
-    # Calculate result
-    total_marks = sum(
-        row["marks"] for row in report_data
-    )
-
-    max_marks = sum(
-        row["max_marks"] for row in report_data
-    )
-
-    percentage = 0
-
-    if max_marks > 0:
-        percentage = (
-            total_marks / max_marks
-        ) * 100
-
-    if percentage >= 90:
-        grade = "A+"
-    elif percentage >= 80:
-        grade = "A"
-    elif percentage >= 70:
-        grade = "B"
-    elif percentage >= 60:
-        grade = "C"
-    elif percentage >= 50:
-        grade = "D"
-    else:
-        grade = "F"
-
-    # Create Excel workbook
-    workbook = Workbook()
-    sheet = workbook.active
-    sheet.title = "Student Report"
-
-    # Title
-    sheet["A1"] = "STUDENT PERFORMANCE REPORT"
-    sheet["A1"].font = Font(
-        bold=True,
-        size=16
-    )
-
-    sheet.merge_cells("A1:D1")
-    sheet["A1"].alignment = Alignment(
-        horizontal="center"
-    )
-
-    # Student information
-    sheet["A3"] = "Student Name"
-    sheet["B3"] = report_data[0]["student_name"]
-
-    sheet["A4"] = "Roll Number"
-    sheet["B4"] = report_data[0]["roll_no"]
-
-    # Headers
-    sheet["A6"] = "Subject"
-    sheet["B6"] = "Marks Obtained"
-    sheet["C6"] = "Maximum Marks"
-    sheet["D6"] = "Percentage"
-
-    for cell in sheet[6]:
-        cell.font = Font(bold=True)
-        cell.alignment = Alignment(
-            horizontal="center"
-        )
-
-    # Subject data
-    row_number = 7
-
-    for row in report_data:
-
-        sheet.cell(
-            row=row_number,
-            column=1,
-            value=row["subject"]
-        )
-
-        sheet.cell(
-            row=row_number,
-            column=2,
-            value=row["marks"]
-        )
-
-        sheet.cell(
-            row=row_number,
-            column=3,
-            value=row["max_marks"]
-        )
-
-        subject_percentage = 0
-
-        if row["max_marks"] > 0:
-            subject_percentage = (
-                row["marks"] /
-                row["max_marks"]
-            ) * 100
-
-        sheet.cell(
-            row=row_number,
-            column=4,
-            value=round(subject_percentage, 2)
-        )
-
-        row_number += 1
-
-    # Summary
-    summary_row = row_number + 1
-
-    sheet.cell(
-        row=summary_row,
-        column=1,
-        value="Total Marks"
-    )
-
-    sheet.cell(
-        row=summary_row,
-        column=2,
-        value=total_marks
-    )
-
-    sheet.cell(
-        row=summary_row,
-        column=3,
-        value=max_marks
-    )
-
-    sheet.cell(
-        row=summary_row + 1,
-        column=1,
-        value="Overall Percentage"
-    )
-
-    sheet.cell(
-        row=summary_row + 1,
-        column=2,
-        value=round(percentage, 2)
-    )
-
-    sheet.cell(
-        row=summary_row + 2,
-        column=1,
-        value="Grade"
-    )
-
-    sheet.cell(
-        row=summary_row + 2,
-        column=2,
-        value=grade
-    )
-
-    # Bold summary labels
-    for row in range(
-        summary_row,
-        summary_row + 3
-    ):
-        sheet.cell(
-            row=row,
-            column=1
-        ).font = Font(bold=True)
-
-    # Column widths
-    sheet.column_dimensions["A"].width = 25
-    sheet.column_dimensions["B"].width = 20
-    sheet.column_dimensions["C"].width = 20
-    sheet.column_dimensions["D"].width = 18
-
-    # Save Excel in memory
-    excel_buffer = io.BytesIO()
-
-    workbook.save(excel_buffer)
-
-    excel_buffer.seek(0)
-
-    return send_file(
-        excel_buffer,
-        as_attachment=True,
-        download_name=(
-            f"{report_data[0]['student_name']}_Report.xlsx"
-        ),
-        mimetype=(
-            "application/vnd.openxmlformats-officedocument"
-            ".spreadsheetml.sheet"
-        )
-    )
-    
-    # =========================
+# =========================
 # EDIT MARKS
 # =========================
 
@@ -5274,276 +5421,7 @@ def overall_performance():
 
         participation_count=participation_count
     )
-  
 
-@app.route("/verify-msg91-token", methods=["POST"])
-def verify_msg91_token():
-
-    data = request.get_json(silent=True) or {}
-
-    access_token = data.get("access_token")
-
-    print("========== MSG91 DATA ==========")
-    print("Access Token received:", bool(access_token))
-    print("================================")
-
-    if not access_token:
-        return {
-            "success": False,
-            "error": "Access token not received."
-        }, 400
-
-    # IMPORTANT:
-    # Apna existing MSG91 AuthKey yahan rakho.
-    MSG91_AUTHKEY = os.getenv("MSG91_AUTHKEY")
-
-    try:
-
-        response = requests.post(
-            "https://control.msg91.com/api/v5/widget/verifyAccessToken",
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            json={
-                "authkey": MSG91_AUTHKEY,
-                "access-token": access_token
-            },
-            timeout=15
-        )
-
-        print("========== MSG91 RESPONSE ==========")
-        print("STATUS:", response.status_code)
-        print("TEXT:", response.text)
-        print("====================================")
-        
-        try:
-            result = response.json()
-        except ValueError:
-            print("========== MSG91 NON-JSON RESPONSE ==========")
-            print("STATUS:", response.status_code)
-            print("CONTENT-TYPE:", response.headers.get("Content-Type"))
-            print("TEXT:", response.text)
-            print("=============================================")
-            
-            return {
-                "success": False,
-                "error": "MSG91 returned a non-JSON response.",
-                "status": response.status_code,
-                "content_type": response.headers.get("Content-Type"),
-                "response_text": response.text[:500]
-            }, 400
-
-        # MSG91 error response
-        if result.get("type") == "error":
-            return {
-                "success": False,
-                "error": result.get(
-                    "message",
-                    "MSG91 token verification failed."
-                )
-            }, 400
-
-        if response.status_code != 200:
-            return {
-                "success": False,
-                "error": "MSG91 token verification failed."
-            }, 400
-
-        # ==========================================
-        # GET VERIFIED USER INFORMATION FROM MSG91
-        # ==========================================
-
-        print("Verified MSG91 result:", result)
-
-        # Try to find mobile/email from MSG91 response
-        verified_identifier = None
-
-        possible_data = []
-
-        if isinstance(result, dict):
-            possible_data.append(result)
-
-            if isinstance(result.get("data"), dict):
-                possible_data.append(result["data"])
-
-            if isinstance(result.get("message"), dict):
-                possible_data.append(result["message"])
-
-        for item in possible_data:
-
-            if not verified_identifier:
-                verified_identifier = (
-                    item.get("identifier")
-                    or item.get("mobile")
-                    or item.get("phone")
-                    or item.get("email")
-                    or item.get("user")
-                )
-
-        print("Verified identifier:", verified_identifier)
-
-        if not verified_identifier:
-
-            return {
-                "success": False,
-                "error": "MSG91 verified the OTP, but mobile/email could not be obtained."
-            }, 400
-
-        # ==========================================
-        # FIND STUDENT IN DATABASE
-        # ==========================================
-
-        db = get_db_connection()
-        cursor = db.cursor(dictionary=True)
-
-        identifier_clean = str(
-            verified_identifier
-        ).strip()
-
-        # ------------------------------------------
-        # TRY EMAIL
-        # ------------------------------------------
-
-        cursor.execute("""
-            SELECT id, student_name, email, phone
-            FROM students
-            WHERE email = %s
-            LIMIT 1
-        """, (identifier_clean,))
-
-        student = cursor.fetchone()
-
-        # ------------------------------------------
-        # TRY PHONE
-        # ------------------------------------------
-
-        if not student:
-
-            phone_clean = identifier_clean.replace(
-                " ", ""
-            ).replace("-", "")
-
-            if phone_clean.startswith("+91"):
-                phone_clean = phone_clean[3:]
-
-            elif (
-                phone_clean.startswith("91")
-                and len(phone_clean) == 12
-            ):
-                phone_clean = phone_clean[2:]
-
-            cursor.execute("""
-                SELECT id, student_name, email, phone
-                FROM students
-                WHERE phone = %s
-                LIMIT 1
-            """, (phone_clean,))
-
-            student = cursor.fetchone()
-
-        cursor.close()
-        db.close()
-
-        # ------------------------------------------
-        # STUDENT NOT FOUND
-        # ------------------------------------------
-
-        if not student:
-
-            return {
-                "success": False,
-                "error": "No student account found with this mobile number or email."
-            }, 404
-
-        # ==========================================
-        # SAVE RESET SESSION
-        # ==========================================
-
-        session["otp_verified"] = True
-        session["reset_student_id"] = student["id"]
-
-        print("========== STUDENT FOUND ==========")
-        print("Student ID:", student["id"])
-        print("Student Name:", student["student_name"])
-        print("===================================")
-
-        return {
-            "success": True,
-            "message": "OTP verified successfully."
-        }
-
-    except requests.exceptions.RequestException as e:
-
-        print("MSG91 REQUEST ERROR:", str(e))
-
-        return {
-            "success": False,
-            "error": "Unable to connect to MSG91."
-        }, 500
-
-    except Exception as e:
-
-        print("SERVER ERROR:", str(e))
-
-        return {
-            "success": False,
-            "error": "Something went wrong while identifying the student."
-        }, 500
-    
-@app.route("/reset-password", methods=["GET", "POST"])
-def reset_password():
-
-    if not session.get("otp_verified"):
-        return redirect("/forgot-password")
-
-    if request.method == "POST":
-
-        new_password = request.form["new_password"]
-        confirm_password = request.form["confirm_password"]
-
-        if not new_password or not confirm_password:
-            return render_template(
-                "reset_password.html",
-                error="Please fill both password fields."
-            )
-
-        if new_password != confirm_password:
-            return render_template(
-                "reset_password.html",
-                error="Passwords do not match."
-            )
-
-        student_id = session.get("reset_student_id")
-
-        if not student_id:
-            return render_template(
-                "reset_password.html",
-                error="Student account could not be identified."
-            )
-
-        hashed_password = generate_password_hash(new_password)
-
-        db = get_db_connection()
-        cursor = db.cursor()
-
-        cursor.execute("""
-            UPDATE student_users
-            SET password = %s
-            WHERE student_id = %s
-        """, (hashed_password, student_id))
-
-        db.commit()
-
-        cursor.close()
-        db.close()
-
-        session.pop("otp_verified", None)
-        session.pop("reset_student_id", None)
-
-        return redirect("/student-login")
-
-    return render_template("reset_password.html")
 # =========================
 # RUN APPLICATION 
 # =========================
