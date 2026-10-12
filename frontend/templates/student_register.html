@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration | SPAMS</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+            display: flex;
+            flex-direction: column;
+            color: #1e293b;
+        }
+
+        .topbar {
+            padding: 22px 7%;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: white;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 25px;
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .brand-text p {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 16px 40px;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 470px;
+            padding: 36px;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+        }
+
+        .welcome-icon {
+            width: 62px;
+            height: 62px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 16px;
+            background: #eff6ff;
+            border-radius: 19px;
+            font-size: 30px;
+        }
+
+        .heading {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .heading h2 {
+            color: #0f172a;
+            font-size: 26px;
+            margin-bottom: 9px;
+        }
+
+        .heading p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .notice {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            margin-bottom: 22px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .message,
+        .error {
+            padding: 12px;
+            margin-bottom: 18px;
+            border-radius: 9px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .message {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        input {
+            width: 100%;
+            height: 48px;
+            padding: 0 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        .help-text {
+            margin-top: 7px;
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .register-btn {
+            width: 100%;
+            min-height: 50px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #1d4ed8, #2563eb);
+            color: #fff;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.22);
+            transition: 0.2s;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 9px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 18px;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        .separator::before,
+        .separator::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .login-link {
+            text-align: center;
+            padding: 15px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 11px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .login-link a {
+            color: #1d4ed8;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 0 15px 22px;
+            color: #cbd5e1;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .topbar {
+                padding: 18px;
+            }
+
+            .brand-text h1 {
+                font-size: 15px;
+            }
+
+            .register-card {
+                padding: 27px 21px;
+                border-radius: 18px;
+            }
+
+            .heading h2 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand-icon">🎓</div>
+
+        <div class="brand-text">
+            <h1>Student Performance System</h1>
+            <p>Academic Management Portal</p>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="register-card">
+
+            <div class="welcome-icon">📝</div>
+
+            <div class="heading">
+                <h2>Create Your Account</h2>
+                <p>Register to access your student dashboard and academic records.</p>
+            </div>
+
+            <div class="notice">
+                <span>ℹ️</span>
+                <span>
+                    Use the Internal Roll Number or University Roll Number
+                    already registered by your college administrator.
+                </span>
+            </div>
+
+            {% if message %}
+                <div class="message">{{ message }}</div>
+            {% endif %}
+
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+
+                <div class="form-group">
+                    <label for="roll_no">Registration / Roll Number</label>
+                    <input
+                        type="text"
+                        id="roll_no"
+                        name="roll_no"
+                        placeholder="Enter your registered roll number"
+                        autocomplete="off"
+                        required
+                    >
+                    <p class="help-text">
+                        Enter the roll number provided by your administrator.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Choose Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Create your username"
+                        maxlength="50"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Create Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Enter the same password again"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="register-btn">
+                    Create Student Account &nbsp; →
+                </button>
+
+            </form>
+
+            <div class="separator">ALREADY REGISTERED?</div>
+
+            <div class="login-link">
+                Already have an account?
+                <a href="/student-login">Student Login →</a>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        Student Performance Analysis and Management System
+    </footer>
+
+</body>
+</html>

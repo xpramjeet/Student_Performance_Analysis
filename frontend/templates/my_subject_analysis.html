@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Subject Analysis</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            margin: 0;
+        }
+
+        .back {
+            background: #1e40af;
+            color: white;
+            padding: 11px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .welcome {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+
+        table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .weak {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .average {
+            color: #92400e;
+            background: #fef3c7;
+        }
+
+        .good {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>📊 My Subject Analysis</h1>
+        <a href="/student-dashboard" class="back">
+            ← Dashboard
+        </a>
+    </div>
+
+    <div class="welcome">
+        <h3>Welcome, {{ student_name }}</h3>
+        <p>
+            Review your subject-wise performance and use the
+            suggestions to improve your results.
+        </p>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Obtained Marks</th>
+                    <th>Maximum Marks</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
+                    <th>Improvement Suggestion</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in results %}
+                <tr>
+                    <td>{{ row.subject }}</td>
+                    <td>{{ row.total_marks }}</td>
+                    <td>{{ row.max_marks }}</td>
+                    <td>{{ row.percentage }}%</td>
+
+                    <td>
+                        {% if row.status == "Needs Improvement" %}
+                            <span class="badge weak">
+                                {{ row.status }}
+                            </span>
+                        {% elif row.status == "Average" %}
+                            <span class="badge average">
+                                {{ row.status }}
+                            </span>
+                        {% else %}
+                            <span class="badge good">
+                                {{ row.status }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ row.suggestion }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty">
+                        No subject marks found yet.
+                        Please check again after marks are added.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

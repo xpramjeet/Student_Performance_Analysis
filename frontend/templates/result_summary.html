@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic Grade & Result Summary</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        h1 {
+            margin: 0;
+            color: #1e3a8a;
+        }
+
+        .back {
+            text-decoration: none;
+            background: #1e40af;
+            color: white;
+            padding: 11px 16px;
+            border-radius: 6px;
+        }
+
+        .info {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+
+        .table-wrapper {
+            background: white;
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+
+        table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .pass {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .no-result {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+        }
+
+        .note {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>🎓 Grade & Result Summary</h1>
+        <a href="/dashboard" class="back">← Dashboard</a>
+    </div>
+
+    <div class="info">
+        <strong>Automatic Result Summary</strong>
+        <p>
+            View each student's total marks, maximum marks,
+            percentage, grade and provisional result.
+        </p>
+        <strong>Grading:</strong>
+        A+ (90%+), A (80%+), B (70%+), C (60%+),
+        D (50%+), F (below 50%).
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Total Marks</th>
+                    <th>Maximum Marks</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.roll_no }}</td>
+                    <td>{{ student.student_name }}</td>
+                    <td>{{ student.total_marks }}</td>
+                    <td>{{ student.max_marks }}</td>
+                    <td>{{ student.percentage }}%</td>
+                    <td>{{ student.grade }}</td>
+                    <td>
+                        {% if student.result == "Pass" %}
+                            <span class="badge pass">Pass</span>
+                        {% elif student.result == "Fail" %}
+                            <span class="badge fail">Fail</span>
+                        {% else %}
+                            <span class="badge no-result">No Result</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="empty">
+                        No students found. Add student records first.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="note">
+        Note: This is a provisional project summary based on overall
+        percentage, not an official university result.
+    </p>
+
+</div>
+</body>
+</html>

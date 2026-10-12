@@ -14,7 +14,11 @@ import random
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, session, send_file
 from flask import Flask, render_template, request, redirect, session, send_file
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="frontend/templates",
+    static_folder="frontend/static"
+)
 app.secret_key = "student_performance_secret_key"
 
 # =========================

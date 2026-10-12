@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Result Summary</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 35px auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            margin: 0;
+        }
+
+        .back {
+            background: #1e40af;
+            color: white;
+            padding: 11px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0000000d;
+            margin-bottom: 20px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .item {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .label {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .pass {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .fail {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .no-result {
+            color: #374151;
+            background: #e5e7eb;
+        }
+
+        .note {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                margin: 15px auto;
+            }
+
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>🎓 My Result Summary</h1>
+        <a href="/student-dashboard" class="back">
+            ← Dashboard
+        </a>
+    </div>
+
+    <div class="card">
+        <h2>{{ student.student_name }}</h2>
+
+        <p>
+            <strong>Roll Number:</strong>
+            {{ student.roll_no }}
+        </p>
+
+        <div class="details">
+            <div class="item">
+                <div class="label">Total Marks Obtained</div>
+                <div class="value">{{ student.total_marks }}</div>
+            </div>
+
+            <div class="item">
+                <div class="label">Maximum Marks</div>
+                <div class="value">{{ student.max_marks }}</div>
+            </div>
+
+            <div class="item">
+                <div class="label">Overall Percentage</div>
+                <div class="value">{{ student.percentage }}%</div>
+            </div>
+
+            <div class="item">
+                <div class="label">Grade</div>
+                <div class="value">{{ student.grade }}</div>
+            </div>
+        </div>
+
+        <h3>Result Status</h3>
+
+        {% if student.result == "Pass" %}
+            <span class="badge pass">PASS</span>
+        {% elif student.result == "Fail" %}
+            <span class="badge fail">FAIL</span>
+        {% else %}
+            <span class="badge no-result">NO RESULT</span>
+        {% endif %}
+
+        <p class="note">
+            This is a provisional project result calculated from your
+            recorded overall percentage. It is not an official university
+            result and does not apply subject-wise passing criteria.
+        </p>
+    </div>
+
+</div>
+</body>
+</html>

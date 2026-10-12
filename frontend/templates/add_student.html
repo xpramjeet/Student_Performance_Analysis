@@ -1,0 +1,426 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student | Student Performance System</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fb;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 25px 20px;
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .header h1 {
+            font-size: 27px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #dbeafe;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px 30px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .form-heading {
+            margin-bottom: 25px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .form-heading h2 {
+            font-size: 23px;
+            margin-bottom: 8px;
+        }
+
+        .form-heading p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .form-group {
+            min-width: 0;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group > label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 9px;
+            color: #334155;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        .form-group input:not([type="checkbox"]),
+        .form-group select {
+            display: block;
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            background: white;
+            color: #1e293b;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .field-help {
+            display: block;
+            margin-top: 8px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .subject-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid #dbe3ef;
+            border-radius: 9px;
+            background: #f8fafc;
+        }
+
+        .subject-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #334155;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .subject-option:hover {
+            border-color: #93c5fd;
+            background: #eff6ff;
+        }
+
+        .subject-option input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: #2563eb;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .error-message {
+            color: #b91c1c;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 12px 14px;
+            margin-top: 12px;
+            border-radius: 7px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .success-message {
+            color: #166534;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            border: none;
+            border-radius: 7px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .save-btn {
+            color: white;
+            background: #2563eb;
+        }
+
+        .save-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .back-btn {
+            color: #334155;
+            background: #e2e8f0;
+        }
+
+        .back-btn:hover {
+            background: #cbd5e1;
+        }
+
+        @media (max-width: 650px) {
+            .form-grid,
+            .subject-list {
+                grid-template-columns: 1fr;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <h1>🎓 Student Performance System</h1>
+            <p>Academic Management Portal</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="form-card">
+
+            <div class="form-heading">
+                <h2>➕ Add New Student</h2>
+                <p>Enter the student's details and assign their subjects.</p>
+            </div>
+
+            {% if error %}
+                <div class="error-message" role="alert">
+                    ⚠️ {{ error }}
+                </div>
+            {% endif %}
+
+            {% if success %}
+                <div class="success-message" role="status">
+                    {{ success }}
+                </div>
+            {% endif %}
+
+            <form action="{{ url_for('add_student') }}" method="POST">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="roll_no">
+                            Internal Roll Number <span class="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="roll_no"
+                            name="roll_no"
+                            placeholder="Enter internal roll number"
+                            value="{{ request.form.get('roll_no', '') }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="university_roll_no">
+                            University Roll Number
+                        </label>
+                        <input
+                            type="text"
+                            id="university_roll_no"
+                            name="university_roll_no"
+                            placeholder="Enter university roll number"
+                            value="{{ request.form.get('university_roll_no', '') }}"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="student_name">
+                            Student Name <span class="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="student_name"
+                            name="student_name"
+                            placeholder="Enter full name"
+                            value="{{ request.form.get('student_name', '') }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="course">
+                            Course <span class="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="course"
+                            name="course"
+                            placeholder="e.g. BCA"
+                            value="{{ request.form.get('course', '') }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="semester">
+                            Semester <span class="required">*</span>
+                        </label>
+                        <select id="semester" name="semester" required>
+                            <option value="">Select Semester</option>
+                            {% for sem in range(1, 7) %}
+                                <option
+                                    value="{{ sem }}"
+                                    {% if request.form.get('semester', '') == sem|string %}selected{% endif %}
+                                >
+                                    Semester {{ sem }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            Email Address <span class="required">*</span>
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="student@example.com"
+                            value="{{ request.form.get('email', '') }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">
+                            Phone Number <span class="required">*</span>
+                        </label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="Enter phone number"
+                            value="{{ request.form.get('phone', '') }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>
+                            Assign Subjects <span class="required">*</span>
+                        </label>
+
+                        <div class="subject-list">
+                            {% for subject in subjects %}
+                                <label class="subject-option">
+                                    <input
+                                        type="checkbox"
+                                        name="subject_ids"
+                                        value="{{ subject.id }}"
+                                        {% if subject.id|string in request.form.getlist('subject_ids') %}checked{% endif %}
+                                    >
+                                    <span>{{ subject.subject_name }}</span>
+                                </label>
+                            {% else %}
+                                <p>No subjects available. Please add subjects first.</p>
+                            {% endfor %}
+                        </div>
+
+                        <small class="field-help">
+                            Select all subjects assigned to this student.
+                            At least one subject is required.
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn save-btn">
+                        💾 Save Student
+                    </button>
+
+                    <a href="{{ url_for('students') }}" class="btn back-btn">
+                        ← Back to Students
+                    </a>
+                </div>
+
+            </form>
+        </section>
+    </main>
+
+</body>
+</html>

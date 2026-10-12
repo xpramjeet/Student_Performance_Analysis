@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject-wise Weakness Analysis</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            margin: 0;
+        }
+
+        .back {
+            background: #1e40af;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .info {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .weak {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .average {
+            color: #92400e;
+            background: #fef3c7;
+        }
+
+        .good {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>📊 Subject-wise Analysis</h1>
+        <a class="back" href="/dashboard">← Dashboard</a>
+    </div>
+
+    <div class="info">
+        <strong>Purpose:</strong>
+        Identify subjects that need improvement using recorded marks.
+
+        <br><br>
+
+        <strong>Performance criteria:</strong>
+        Below 50% = Needs Improvement;
+        50–69.99% = Average;
+        70% or above = Good.
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Obtained Marks</th>
+                    <th>Maximum Marks</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
+                    <th>Suggestion</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in results %}
+                <tr>
+                    <td>{{ row.roll_no }}</td>
+                    <td>{{ row.student_name }}</td>
+                    <td>{{ row.subject }}</td>
+                    <td>{{ row.total_marks }}</td>
+                    <td>{{ row.max_marks }}</td>
+                    <td>{{ row.percentage }}%</td>
+
+                    <td>
+                        {% if row.status == "Needs Improvement" %}
+                            <span class="status weak">
+                                {{ row.status }}
+                            </span>
+                        {% elif row.status == "Average" %}
+                            <span class="status average">
+                                {{ row.status }}
+                            </span>
+                        {% else %}
+                            <span class="status good">
+                                {{ row.status }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ row.suggestion }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty">
+                        No marks found. Add student marks to view analysis.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

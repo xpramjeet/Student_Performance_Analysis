@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Reports</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f3f6fc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 32px auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #172554, #1d4ed8);
+            color: white;
+            padding: 32px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 12px 28px rgba(29, 78, 216, 0.16);
+        }
+
+        .header h1 {
+            font-size: clamp(25px, 4vw, 34px);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #dbeafe;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .header-tag {
+            display: inline-block;
+            margin-bottom: 15px;
+            padding: 6px 11px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .card {
+            background: white;
+            padding: 27px;
+            border: 1px solid #e5eaf3;
+            border-radius: 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 22px rgba(15, 23, 42, 0.045);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin-bottom: 22px;
+        }
+
+        .section-icon {
+            width: 46px;
+            height: 46px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #eaf1ff;
+            border-radius: 13px;
+            font-size: 22px;
+        }
+
+        .section-heading h2 {
+            color: #172554;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .section-heading p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select {
+            flex: 1 1 280px;
+            min-width: 0;
+            min-height: 47px;
+            padding: 12px 14px;
+            border: 1px solid #d7dfec;
+            border-radius: 10px;
+            background: white;
+            color: #1e293b;
+            font-size: 14px;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 650;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.92;
+        }
+
+        .btn-primary {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .btn-pdf {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-excel {
+            background: #15803d;
+            color: white;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 17px;
+            margin-bottom: 28px;
+        }
+
+        .info-box {
+            padding: 20px;
+            border: 1px solid #e2eaf8;
+            border-radius: 13px;
+            background: #f8faff;
+        }
+
+        .info-label {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 650;
+            margin-bottom: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .info-value {
+            color: #172554;
+            font-size: 18px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .table-heading {
+            color: #172554;
+            font-size: 19px;
+            margin: 8px 0 17px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e5eaf3;
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #172554;
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 650;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #edf0f6;
+            font-size: 13px;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f8faff;
+        }
+
+        .subject-name {
+            color: #172554;
+            font-weight: 650;
+        }
+
+        .percentage-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #eaf1ff;
+            color: #1d4ed8;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 25px;
+        }
+
+        .summary-box {
+            padding: 23px 15px;
+            border: 1px solid #e5eaf3;
+            border-radius: 14px;
+            background: #f8faff;
+            text-align: center;
+        }
+
+        .summary-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .summary-box h3 {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .summary-box p {
+            color: #172554;
+            font-size: clamp(20px, 3vw, 27px);
+            font-weight: 750;
+            overflow-wrap: anywhere;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px 15px;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 13px;
+        }
+
+        .empty h3 {
+            color: #172554;
+            font-size: 19px;
+            margin-bottom: 8px;
+        }
+
+        .empty p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            padding: 12px 17px;
+            background: #eaf1ff;
+            color: #1d4ed8;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .back-btn:hover {
+            background: #dbeafe;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 10px 10px 25px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                width: 94%;
+                margin: 20px auto;
+            }
+
+            .header {
+                padding: 25px 20px;
+                border-radius: 15px;
+            }
+
+            .card {
+                padding: 20px 15px;
+                border-radius: 14px;
+            }
+
+            .student-info,
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                align-items: stretch;
+            }
+
+            .form-row select,
+            .form-row .btn {
+                width: 100%;
+                flex-basis: 100%;
+            }
+
+            .section-heading h2 {
+                font-size: 18px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .header {
+                box-shadow: none;
+                print-color-adjust: exact;
+            }
+
+            .selection-card,
+            .back-btn,
+            .footer {
+                display: none !important;
+            }
+
+            .container {
+                width: 100%;
+                margin: 0;
+            }
+
+            .card {
+                box-shadow: none;
+                break-inside: avoid;
+            }
+
+            .table-wrapper {
+                overflow: visible;
+            }
+
+            table {
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <header class="header">
+        <span class="header-tag">📊 Academic Analytics</span>
+        <h1>Student Performance Reports</h1>
+        <p>
+            Review subject-wise marks, overall percentage and grade.
+            Download individual student reports in PDF or Excel format.
+        </p>
+    </header>
+
+    <section class="card selection-card">
+        <div class="section-heading">
+            <div class="section-icon">👨‍🎓</div>
+            <div>
+                <h2>Select Student</h2>
+                <p>Choose a student to view their academic performance.</p>
+            </div>
+        </div>
+
+        <form method="GET" action="/report">
+            <div class="form-row">
+                <select name="student_id" required>
+                    <option value="">-- Select Student --</option>
+
+                    {% for student in students %}
+                    <option
+                        value="{{ student.id }}"
+                        {% if selected_student_id|string == student.id|string %}
+                        selected
+                        {% endif %}
+                    >
+                        {{ student.roll_no }} - {{ student.student_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn btn-primary">
+                    🔍 View Report
+                </button>
+
+                {% if selected_student_id %}
+                <a
+                    href="{{ url_for('download_student_report', student_id=selected_student_id) }}"
+                    class="btn btn-pdf"
+                >
+                    📄 Download PDF
+                </a>
+
+                <a
+                    href="{{ url_for('download_excel', student_id=selected_student_id) }}"
+                    class="btn btn-excel"
+                >
+                    📊 Download Excel
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </section>
+
+    {% if report %}
+    <section class="card">
+        <div class="section-heading">
+            <div class="section-icon">📑</div>
+            <div>
+                <h2>Student Information</h2>
+                <p>Student details and subject-wise academic results.</p>
+            </div>
+        </div>
+
+        <div class="student-info">
+            <div class="info-box">
+                <span class="info-label">Student Name</span>
+                <span class="info-value">
+                    {{ selected_student.student_name }}
+                </span>
+            </div>
+
+            <div class="info-box">
+                <span class="info-label">Roll Number</span>
+                <span class="info-value">
+                    {{ selected_student.roll_no or '-' }}
+                </span>
+            </div>
+        </div>
+
+        <h2 class="table-heading">📚 Subject-wise Performance</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Maximum Marks</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for record in report %}
+                    <tr>
+                        <td class="subject-name">
+                            {{ record.subject or '-' }}
+                        </td>
+                        <td>{{ record.marks }}</td>
+                        <td>{{ record.max_marks }}</td>
+                        <td>
+                            <span class="percentage-badge">
+                                {% if record.max_marks and record.max_marks > 0 %}
+                                    {{ "%.2f"|format((record.marks / record.max_marks) * 100) }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary">
+            <div class="summary-box">
+                <div class="summary-icon">📝</div>
+                <h3>Total Marks</h3>
+                <p>{{ total_marks }} / {{ max_marks }}</p>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-icon">📈</div>
+                <h3>Overall Percentage</h3>
+                <p>{{ "%.2f"|format(percentage) }}%</p>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-icon">🏆</div>
+                <h3>Final Grade</h3>
+                <p>{{ grade }}</p>
+            </div>
+        </div>
+
+        <a href="/dashboard" class="back-btn">
+            ← Back to Admin Dashboard
+        </a>
+    </section>
+
+    {% else %}
+    <section class="card">
+        <div class="empty">
+            <div class="empty-icon">📊</div>
+            <h3>No Report Selected</h3>
+            <p>
+                Select a student from the dropdown above and click
+                <strong>View Report</strong> to see their performance details.
+            </p>
+        </div>
+    </section>
+    {% endif %}
+
+    <footer class="footer">
+        Student Performance Analysis and Management System
+    </footer>
+
+</div>
+</body>
+</html>

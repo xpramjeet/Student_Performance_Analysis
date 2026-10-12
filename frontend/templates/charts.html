@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Charts & Analytics | Student Performance</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        :root {
+            --primary: #243f87;
+            --primary-dark: #172d65;
+            --background: #f3f6fc;
+            --text: #26334d;
+            --muted: #718096;
+            --border: #e5eaf4;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(120deg, #172d65, #3158ae);
+            color: white;
+            padding: 22px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 5px 20px rgba(23, 45, 101, 0.18);
+        }
+
+        .header h1 {
+            font-size: 25px;
+            margin-bottom: 7px;
+        }
+
+        .header p {
+            color: #dce6ff;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 17px;
+            background: white;
+            color: var(--primary);
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .back:hover {
+            background: #eaf0ff;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1400px;
+            margin: 30px auto;
+        }
+
+        .page-intro {
+            margin-bottom: 25px;
+        }
+
+        .page-intro h2 {
+            color: var(--primary);
+            font-size: 25px;
+            margin-bottom: 8px;
+        }
+
+        .page-intro p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .overview {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .overview-card {
+            background: white;
+            padding: 19px;
+            border-radius: 13px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(30, 55, 100, 0.045);
+        }
+
+        .overview-card span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 9px;
+        }
+
+        .overview-card h3 {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .section-heading {
+            color: var(--primary);
+            font-size: 20px;
+            margin-bottom: 17px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 23px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            box-shadow: 0 5px 20px rgba(30, 55, 100, 0.055);
+            min-width: 0;
+        }
+
+        .chart-card h3 {
+            color: var(--primary);
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .chart-card p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .chart-box {
+            position: relative;
+            width: 100%;
+            height: 310px;
+        }
+
+        .empty-message {
+            display: none;
+            color: var(--muted);
+            text-align: center;
+            padding: 35px 10px;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 24px 15px;
+            margin-top: 35px;
+            background: #172d65;
+            color: #e4eaff;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 1000px) {
+            .overview {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .chart-grid {
+                gap: 16px;
+            }
+
+            .chart-card {
+                padding: 18px;
+            }
+
+            .chart-box {
+                height: 280px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header {
+                padding: 20px 5%;
+            }
+
+            .header h1 {
+                font-size: 21px;
+            }
+
+            .container {
+                width: 92%;
+                margin-top: 23px;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-intro h2 {
+                font-size: 22px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .overview {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-box {
+                height: 250px;
+            }
+
+            .chart-card {
+                padding: 15px;
+            }
+
+            .back {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+    <div>
+        <h1>📊 Charts & Analytics</h1>
+        <p>Student Performance Analysis and Management System</p>
+    </div>
+
+    <a href="/dashboard" class="back">
+        ← Back to Dashboard
+    </a>
+</header>
+
+<main class="container">
+
+    <section class="page-intro">
+        <h2>Student Performance Analysis</h2>
+        <p>
+            Explore academic performance, attendance, theory marks and
+            practical marks through graphical reports.
+        </p>
+    </section>
+
+    <section class="overview">
+        <div class="overview-card">
+            <span>📈 Performance Analysis</span>
+            <h3>Academic</h3>
+        </div>
+
+        <div class="overview-card">
+            <span>📅 Attendance Tracking</span>
+            <h3>Attendance</h3>
+        </div>
+
+        <div class="overview-card">
+            <span>📚 Theory Records</span>
+            <h3>Theory Marks</h3>
+        </div>
+
+        <div class="overview-card">
+            <span>🧪 Practical Records</span>
+            <h3>Practical Marks</h3>
+        </div>
+    </section>
+
+    <h2 class="section-heading">📉 Analytics Dashboard</h2>
+
+    <section class="chart-grid">
+
+        <article class="chart-card">
+            <h3>📈 Student Performance</h3>
+            <p>Compare student performance percentages.</p>
+
+            <div class="chart-box" id="performanceBox">
+                <canvas id="performanceChart"></canvas>
+            </div>
+            <div class="empty-message" id="performanceEmpty">
+                No performance data available yet.
+            </div>
+        </article>
+
+        <article class="chart-card">
+            <h3>📅 Student Attendance</h3>
+            <p>Review attendance percentages for students.</p>
+
+            <div class="chart-box" id="attendanceBox">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+            <div class="empty-message" id="attendanceEmpty">
+                No attendance data available yet.
+            </div>
+        </article>
+
+        <article class="chart-card">
+            <h3>📚 Theory Marks</h3>
+            <p>Compare total theory marks for each student.</p>
+
+            <div class="chart-box" id="marksBox">
+                <canvas id="marksChart"></canvas>
+            </div>
+            <div class="empty-message" id="marksEmpty">
+                No theory marks available yet.
+            </div>
+        </article>
+
+        <article class="chart-card">
+            <h3>🧪 Practical Performance</h3>
+            <p>Review total practical marks for each student.</p>
+
+            <div class="chart-box" id="practicalBox">
+                <canvas id="practicalChart"></canvas>
+            </div>
+            <div class="empty-message" id="practicalEmpty">
+                No practical marks available yet.
+            </div>
+        </article>
+
+    </section>
+</main>
+
+<footer class="footer">
+    © 2026 Student Performance Analysis & Management System
+    <br>
+    Charts & Analytics Dashboard
+</footer>
+
+<script>
+    // Data received from Flask backend
+    const performanceLabels =
+        {{ student_names | default([]) | tojson }};
+
+    const performanceValues =
+        {{ percentages | default([]) | tojson }};
+
+    const attendanceLabels =
+        {{ attendance_names | default([]) | tojson }};
+
+    const attendanceValues =
+        {{ attendance_values | default([]) | tojson }};
+
+    const marksLabels =
+        {{ marks_labels | default([]) | tojson }};
+
+    const marksValues =
+        {{ marks_values | default([]) | tojson }};
+
+    const practicalLabels =
+        {{ practical_labels | default([]) | tojson }};
+
+    const practicalValues =
+        {{ practical_values | default([]) | tojson }};
+
+
+    // Colors for individual student bars
+    const barColors = [
+        "rgba(59, 130, 246, 0.78)",
+        "rgba(16, 185, 129, 0.78)",
+        "rgba(245, 158, 11, 0.78)",
+        "rgba(139, 92, 246, 0.78)",
+        "rgba(236, 72, 153, 0.78)"
+    ];
+
+    const borderColors = [
+        "#3b82f6",
+        "#10b981",
+        "#f59e0b",
+        "#8b5cf6",
+        "#ec4899"
+    ];
+
+
+    function createBarChart(
+        canvasId,
+        labels,
+        values,
+        label,
+        percentage = false
+    ) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const chartBox = canvas.parentElement;
+        const emptyMessage = document.getElementById(
+            canvasId.replace("Chart", "Empty")
+        );
+
+        // Handle empty datasets
+        if (!labels || labels.length === 0 ||
+            !values || values.length === 0) {
+            chartBox.style.display = "none";
+
+            if (emptyMessage) {
+                emptyMessage.style.display = "block";
+            }
+            return;
+        }
+
+        new Chart(canvas, {
+            type: "bar",
+
+            data: {
+                labels: labels,
+
+                datasets: [{
+                    label: label,
+                    data: values,
+
+                    backgroundColor: labels.map(
+                        (_, index) => barColors[index % barColors.length]
+                    ),
+
+                    borderColor: labels.map(
+                        (_, index) => borderColors[index % borderColors.length]
+                    ),
+
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    maxBarThickness: 48
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        enabled: true,
+
+                        callbacks: {
+                            label: function(context) {
+                                const value = Number(context.parsed.y ?? 0);
+                                const formattedValue = value.toLocaleString(
+                                    "en-IN",
+                                    { maximumFractionDigits: 2 }
+                                );
+
+                                return percentage
+                                    ? `${label}: ${formattedValue}%`
+                                    : `${label}: ${formattedValue} marks`;
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+                            autoSkip: true,
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    },
+
+                    y: {
+                        beginAtZero: true,
+
+                        ...(percentage ? { max: 100 } : {}),
+
+                        title: {
+                            display: true,
+                            text: percentage ? "Percentage (%)" : "Marks"
+                        },
+
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    // Student performance percentage
+    createBarChart(
+        "performanceChart",
+        performanceLabels,
+        performanceValues,
+        "Performance",
+        true
+    );
+
+    // Attendance percentage
+    createBarChart(
+        "attendanceChart",
+        attendanceLabels,
+        attendanceValues,
+        "Attendance",
+        true
+    );
+
+    // Total theory marks
+    createBarChart(
+        "marksChart",
+        marksLabels,
+        marksValues,
+        "Theory Marks"
+    );
+
+    // Total practical marks
+    createBarChart(
+        "practicalChart",
+        practicalLabels,
+        practicalValues,
+        "Practical Marks"
+    );
+</script>
+
+</body>
+</html>

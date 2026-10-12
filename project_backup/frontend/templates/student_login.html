@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login | SPAMS</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+            display: flex;
+            flex-direction: column;
+            color: #1e293b;
+        }
+
+        .topbar {
+            padding: 22px 7%;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: white;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 25px;
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .brand-text p {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px 18px 45px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 38px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+        }
+
+        .welcome-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            background: #eff6ff;
+            border-radius: 20px;
+            font-size: 32px;
+        }
+
+        .heading {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .heading h2 {
+            font-size: 27px;
+            color: #0f172a;
+            margin-bottom: 9px;
+        }
+
+        .heading p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            border-radius: 9px;
+            padding: 12px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-group input {
+            width: 100%;
+            height: 49px;
+            padding: 0 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .forgot-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: -7px;
+            margin-bottom: 22px;
+        }
+
+        .forgot-row a {
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .forgot-row a:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #1d4ed8, #2563eb);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.22);
+            transition: 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 9px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 25px 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .separator::before,
+        .separator::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: #e2e8f0;
+        }
+
+        .register-box {
+            text-align: center;
+            padding: 20px 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+        }
+
+        .register-box p {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 13px;
+        }
+
+        .register-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #2563eb;
+            border-radius: 9px;
+            background: white;
+            color: #1d4ed8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .register-btn:hover {
+            background: #eff6ff;
+            border-color: #1d4ed8;
+        }
+
+        .admin-link {
+            display: block;
+            margin-top: 25px;
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .admin-link:hover {
+            color: #1d4ed8;
+        }
+
+        .footer {
+            text-align: center;
+            color: #cbd5e1;
+            padding: 0 15px 22px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .topbar {
+                padding: 18px;
+            }
+
+            .brand-text h1 {
+                font-size: 15px;
+            }
+
+            .login-card {
+                padding: 28px 22px;
+                border-radius: 18px;
+            }
+
+            .heading h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand-icon">🎓</div>
+
+        <div class="brand-text">
+            <h1>Student Performance System</h1>
+            <p>Academic Management Portal</p>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="login-card">
+
+            <div class="welcome-icon">👨‍🎓</div>
+
+            <div class="heading">
+                <h2>Welcome Back!</h2>
+                <p>Sign in to access your student dashboard.</p>
+            </div>
+
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+
+                <button type="submit" class="login-btn">
+                    Sign In &nbsp; →
+                </button>
+
+            </form>
+
+            <div class="separator">NEW STUDENT?</div>
+
+            <div class="register-box">
+                <p>Create your account using your registered roll number.</p>
+
+                <a href="{{ url_for('student_register') }}"
+                   class="register-btn">
+                    + &nbsp; Create Student Account
+                </a>
+            </div>
+
+            <a href="/" class="admin-link">
+                ← Return to Admin Login
+            </a>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        Student Performance Analysis and Management System
+    </footer>
+
+</body>
+</html>

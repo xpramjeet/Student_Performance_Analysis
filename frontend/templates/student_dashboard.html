@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard | Student Performance Analysis</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --navy: #142b5f;
+            --blue: #2855a6;
+            --light-blue: #eef4ff;
+            --text: #24324b;
+            --muted: #738098;
+            --border: #e6ebf3;
+            --background: #f4f7fc;
+            --green: #16845b;
+            --red: #dc3545;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(120deg, #10234f, #2855a6);
+            color: white;
+            padding: 21px 5%;
+            box-shadow: 0 5px 20px rgba(20, 43, 95, 0.17);
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-icon {
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 26px;
+        }
+
+        .brand h1 {
+            font-size: 22px;
+            font-weight: 750;
+            line-height: 1.35;
+        }
+
+        .student-info {
+            margin-top: 5px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.85);
+            overflow-wrap: anywhere;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .portal-badge {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .logout {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 16px;
+            background: #dc3545;
+            color: white;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 750;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+
+        .logout:hover {
+            background: #b02a37;
+            transform: translateY(-1px);
+        }
+
+        /* Main Container */
+        .container {
+            width: 92%;
+            max-width: 1400px;
+            margin: 35px auto;
+        }
+
+        /* Welcome Section */
+        .welcome {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 25px;
+            padding: 30px;
+            margin-bottom: 30px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 5px 20px rgba(24, 48, 91, 0.045);
+        }
+
+        .welcome::after {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            right: -65px;
+            top: -75px;
+            background: #eef4ff;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .eyebrow {
+            color: var(--blue);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .welcome h2 {
+            color: var(--navy);
+            font-size: 29px;
+            line-height: 1.35;
+            margin-bottom: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .welcome p {
+            max-width: 690px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .welcome-icon {
+            position: relative;
+            z-index: 1;
+            width: 85px;
+            height: 85px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #eef4ff, #dce8ff);
+            font-size: 42px;
+        }
+
+        /* Section Heading */
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .section-heading h2 {
+            color: var(--navy);
+            font-size: 21px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .section-label {
+            color: var(--blue);
+            background: var(--light-blue);
+            border: 1px solid #dce7fb;
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        /* Dashboard Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 24px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 5px 18px rgba(24, 48, 91, 0.04);
+            transition: transform 0.22s, box-shadow 0.22s,
+                        border-color 0.22s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #cad9f5;
+            box-shadow: 0 12px 28px rgba(24, 48, 91, 0.09);
+        }
+
+        .card-top {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 17px;
+        }
+
+        .card-icon {
+            width: 47px;
+            height: 47px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 14px;
+            background: var(--light-blue);
+            font-size: 23px;
+        }
+
+        .card h3 {
+            color: var(--navy);
+            font-size: 17px;
+            font-weight: 750;
+            line-height: 1.45;
+        }
+
+        .card p {
+            flex: 1;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.75;
+            margin-bottom: 19px;
+            overflow-wrap: anywhere;
+        }
+
+        .card a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            background: var(--navy);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 750;
+            transition: background 0.2s;
+        }
+
+        .card a:hover {
+            background: var(--blue);
+        }
+
+        .card a span {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        /* Messages */
+        .unread {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            align-self: flex-start;
+            color: var(--red) !important;
+            background: #fff0f1;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 11px !important;
+            font-weight: 800;
+            margin-top: -7px;
+            margin-bottom: 15px !important;
+        }
+
+        .no-unread {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            align-self: flex-start;
+            color: var(--green) !important;
+            background: #e8f7ef;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 11px !important;
+            font-weight: 800;
+            margin-top: -7px;
+            margin-bottom: 15px !important;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 45px;
+            padding: 22px 15px;
+            background: #10234f;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .footer strong {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1050px) {
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+            .header {
+                padding: 18px 5%;
+            }
+
+            .header-inner {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .brand h1 {
+                font-size: 17px;
+            }
+
+            .brand-icon {
+                width: 43px;
+                height: 43px;
+                font-size: 23px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .container {
+                width: 92%;
+                margin: 25px auto;
+            }
+
+            .welcome {
+                padding: 23px;
+            }
+
+            .welcome h2 {
+                font-size: 24px;
+            }
+
+            .welcome-icon {
+                display: none;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .card {
+                padding: 21px;
+            }
+
+            .section-heading h2 {
+                font-size: 19px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+
+            <div class="brand">
+                <div class="brand-icon">🎓</div>
+
+                <div>
+                    <h1>Student Performance Analysis System</h1>
+
+                    <div class="student-info">
+                        Student: {{ student_name }}
+                        &nbsp; | &nbsp;
+                        Roll No: {{ student_roll_no }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <span class="portal-badge">STUDENT PORTAL</span>
+
+                <a href="/student-logout" class="logout">
+                    ↪ Logout
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+
+        <!-- Welcome Section -->
+        <section class="welcome">
+
+            <div class="welcome-content">
+                <div class="eyebrow">Your Academic Space</div>
+
+                <h2>Welcome, {{ student_name }} 👋</h2>
+
+                <p>
+                    Access your academic records, monitor your performance,
+                    review attendance, manage assignments and stay updated
+                    with important student information.
+                </p>
+            </div>
+
+            <div class="welcome-icon">📊</div>
+
+        </section>
+
+        <!-- Dashboard Section -->
+        <div class="section-heading">
+            <div>
+                <h2>Dashboard Overview</h2>
+                <p>Choose a section to view your academic information.</p>
+            </div>
+
+            <span class="section-label">ACADEMIC PORTAL</span>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <section class="grid">
+
+            <!-- Profile -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Profile</h3>
+                    <div class="card-icon">👤</div>
+                </div>
+
+                <p>
+                    View your personal details and academic profile information.
+                </p>
+
+                <a href="/student-profile">
+                    View Profile <span>→</span>
+                </a>
+            </div>
+
+            <div class="card">
+                <h3>🏆 My Ranking</h3>
+                <p>View your rank and position in the student leaderboard.</p>
+                <a href="/student-ranking">View My Ranking →</a>
+            </div>
+
+            <div class="card">
+                <h3>📊 My Subject Analysis</h3>
+                <p>Check your subject-wise marks and improvement suggestions.</p>
+                <a href="/my-subject-analysis">View My Analysis →</a>
+            </div>
+
+            <div class="card">
+                <h3>🎓 My Result Summary</h3>
+                <p>View your total marks, percentage, grade and provisional result.</p>
+                <a href="/my-result-summary">View My Result →</a>
+            </div>
+
+            <!-- Theory Marks -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Theory Marks</h3>
+                    <div class="card-icon">📚</div>
+                </div>
+
+                <p>
+                    Check your subject-wise theory marks and examination results.
+                </p>
+
+                <a href="/student-marks">
+                    View Marks <span>→</span>
+                </a>
+            </div>
+
+            <!-- Practical -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Practical</h3>
+                    <div class="card-icon">🧪</div>
+                </div>
+
+                <p>
+                    Review your practical subject marks and assessment performance.
+                </p>
+
+                <a href="/student-practical">
+                    View Practical <span>→</span>
+                </a>
+            </div>
+
+            <!-- Assignments -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Assignments</h3>
+                    <div class="card-icon">📝</div>
+                </div>
+
+                <p>
+                    View assignment marks, details and submission status.
+                </p>
+
+                <a href="/student-assignments">
+                    View Assignments <span>→</span>
+                </a>
+            </div>
+
+            <!-- Attendance -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Attendance</h3>
+                    <div class="card-icon">📅</div>
+                </div>
+
+                <p>
+                    Check your subject-wise attendance and attendance percentage.
+                </p>
+
+                <a href="/student-attendance">
+                    View Attendance <span>→</span>
+                </a>
+            </div>
+
+            <!-- Activities -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Activities</h3>
+                    <div class="card-icon">🎯</div>
+                </div>
+
+                <p>
+                    Review your academic and extracurricular activities.
+                </p>
+
+                <a href="/student-activities">
+                    View Activities <span>→</span>
+                </a>
+            </div>
+
+            <!-- Participation -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Participation</h3>
+                    <div class="card-icon">🏆</div>
+                </div>
+
+                <p>
+                    Explore your event participation, achievements and contributions.
+                </p>
+
+                <a href="/student-participation">
+                    View Participation <span>→</span>
+                </a>
+            </div>
+
+            <!-- Overall Performance -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Overall Performance</h3>
+                    <div class="card-icon">📈</div>
+                </div>
+
+                <p>
+                    View your overall academic percentage, grade and improvement areas.
+                </p>
+
+                <a href="/student-overall-performance">
+                    View Performance <span>→</span>
+                </a>
+            </div>
+
+            <!-- Student Report -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Student Report</h3>
+                    <div class="card-icon">📄</div>
+                </div>
+
+                <p>
+                    Review your complete academic report and download your report PDF.
+                </p>
+
+                <a href="/student-report">
+                    View Report <span>→</span>
+                </a>
+            </div>
+
+            <!-- Certificates -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Certificates</h3>
+                    <div class="card-icon">🏅</div>
+                </div>
+
+                <p>
+                    View and download your available certificates.
+                </p>
+
+                <a href="/student-certificates">
+                    View Certificates <span>→</span>
+                </a>
+            </div>
+
+            <!-- Messages -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Messages & Notices</h3>
+                    <div class="card-icon">📩</div>
+                </div>
+
+                <p>
+                    Read important messages and notices sent by the administrator.
+                </p>
+
+                {% if unread_count > 0 %}
+
+                    <p class="unread">
+                        ● {{ unread_count }}
+                        Unread Message{% if unread_count > 1 %}s{% endif %}
+                    </p>
+
+                {% else %}
+
+                    <p class="no-unread">
+                        ✓ No Unread Messages
+                    </p>
+
+                {% endif %}
+
+                <a href="/student-messages">
+                    View Messages <span>→</span>
+                </a>
+            </div>
+
+            <!-- Change Password -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Change Password</h3>
+                    <div class="card-icon">🔐</div>
+                </div>
+
+                <p>
+                    Update your student account password to help keep your account secure.
+                </p>
+
+                <a href="/student-change-password">
+                    Change Password <span>→</span>
+                </a>
+            </div>
+
+            <!-- Account -->
+            <div class="card">
+                <div class="card-top">
+                    <h3>Account Details</h3>
+                    <div class="card-icon">⚙️</div>
+                </div>
+
+                <p>
+                    Review your student account information and profile details.
+                </p>
+
+                <a href="/student-profile">
+                    Account Details <span>→</span>
+                </a>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        © 2026 <strong>Student Performance Analysis and Management System</strong>
+        <div>Academic progress, organized in one place.</div>
+    </footer>
+
+</body>
+
+</html>
+```

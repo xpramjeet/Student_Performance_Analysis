@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Student Ranking</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 28px;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px #0000000d;
+            margin-bottom: 20px;
+        }
+
+        h1 { color: #1e3a8a; }
+
+        .rank {
+            font-size: 46px;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin: 12px 0;
+        }
+
+        .detail {
+            margin: 12px 0;
+            font-size: 17px;
+        }
+
+        .back {
+            display: inline-block;
+            background: #1e40af;
+            color: white;
+            padding: 11px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .note {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .container { margin: 15px auto; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="card">
+        <h1>🏆 My Ranking</h1>
+        <p>Here is your academic ranking based on recorded marks.</p>
+
+        {% if my_ranking %}
+            <div class="rank">Rank #{{ my_ranking.rank }}</div>
+
+            <div class="detail">
+                <strong>Name:</strong>
+                {{ my_ranking.student_name }}
+            </div>
+
+            <div class="detail">
+                <strong>Roll Number:</strong>
+                {{ my_ranking.roll_no }}
+            </div>
+
+            <div class="detail">
+                <strong>Total Marks:</strong>
+                {{ my_ranking.total_marks }} /
+                {{ my_ranking.max_marks }}
+            </div>
+
+            <div class="detail">
+                <strong>Percentage:</strong>
+                {{ my_ranking.percentage }}%
+            </div>
+
+            <div class="detail">
+                <strong>Students Ranked:</strong>
+                {{ total_ranked }}
+            </div>
+        {% else %}
+            <h3>Ranking Not Available Yet</h3>
+            <p>Your marks have not been recorded yet.
+               Please check again after marks are added.</p>
+        {% endif %}
+
+        <p class="note">
+            Ranking is calculated from recorded marks across all subjects.
+            Equal percentages may receive different sequential ranks.
+            This is a project ranking, not an official university ranking.
+        </p>
+
+        <a href="/student-dashboard" class="back">
+            ← Back to Student Dashboard
+        </a>
+    </div>
+
+</div>
+</body>
+</html>

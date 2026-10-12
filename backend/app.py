@@ -5,16 +5,46 @@ from flask import send_file
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from io import BytesIO
+from mysql.connector import IntegrityError
+import mysql.connector
 import os
 
 load_dotenv()
 import mysql.connector
 import io
 import random
+import os
+from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, session, send_file
 from flask import Flask, render_template, request, redirect, session, send_file
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "frontend", "templates"),
+    static_folder=os.path.join(BASE_DIR, "frontend", "static")
+)
+
+UPLOAD_FOLDER = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "frontend",
+    "static",
+    "uploads"
+)
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def allowed_file(filename):
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
+
 app.secret_key = "student_performance_secret_key"
 
 # =========================
@@ -29,8 +59,7 @@ def get_db_connection():
         database=os.getenv("DB_NAME"),
         ssl_disabled=False
     )
-
-
+    
 # =========================
 # HOME / LOGIN
 # =========================
@@ -38,28 +67,48 @@ def get_db_connection():
 def home():
 
     if request.method == "POST":
+        print("MY LOGIN CODE IS RUNNING")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
 
-        username = request.form["username"]
-        password = request.form["password"]
+        db = None
+        cursor = None
+        user = None
 
-        db = get_db_connection()
-        cursor = db.cursor(dictionary=True)
+        try:
+            db = get_db_connection()
+            cursor = db.cursor(dictionary=True)
 
-        cursor.execute(
-            "SELECT * FROM users WHERE username = %s",
-            (username,)
-        )
+            cursor.execute(
+                "SELECT * FROM users WHERE username = %s",
+                (username,)
+            )
+            user = cursor.fetchone()
 
-        user = cursor.fetchone()
+            # Debug: password ya hash print nahi karna
+            print("LOGIN USER FOUND:", user is not None)
 
-        cursor.close()
-        db.close()
+            if user:
+                password_ok = check_password_hash(
+                    user["password"], password
+                )
+                print("PASSWORD CHECK:", password_ok)
+            else:
+                password_ok = False
 
-        if user and check_password_hash(user["password"], password):
+        except Exception as e:
+            print("LOGIN DATABASE ERROR:", str(e))
+            password_ok = False
 
+        finally:
+            if cursor is not None:
+                cursor.close()
+            if db is not None:
+                db.close()
+
+        if user and password_ok:
             session["user_id"] = user["id"]
             session["username"] = user["username"]
-
             return redirect("/dashboard")
 
         return render_template(
@@ -76,6 +125,7 @@ def add_certificate():
         return redirect("/")
 
     db = get_db_connection()
+    print("DATABASE:", db.database, "HOST:", db.server_host, "PORT:", db.server_port)
     cursor = db.cursor(dictionary=True)
 
     message = None
@@ -154,6 +204,7 @@ def student_certificates():
     student_id = session["student_id"]
 
     db = get_db_connection()
+
     cursor = db.cursor(dictionary=True)
 
     cursor.execute("""
@@ -177,8 +228,50 @@ def student_certificates():
         certificates=certificates
     )
     
-    
-    
+
+
+# =========================
+# MARKS LIST
+# =========================
+
+@app.route("/marks")
+def marks():
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        query = """
+            SELECT
+                marks.id,
+                students.roll_no,
+                students.student_name,
+                marks.subject,
+                marks.internal_marks,
+                marks.internal_max_marks,
+                marks.external_marks,
+                marks.external_max_marks,
+                marks.marks,
+                marks.max_marks
+            FROM marks
+            JOIN students
+                ON marks.student_id = students.id
+            ORDER BY marks.id DESC
+        """
+
+        cursor.execute(query)
+        marks_data = cursor.fetchall()
+
+        return render_template(
+            "marks.html",
+            marks=marks_data
+        )
+
+    finally:
+        cursor.close()
+        db.close()
     
 @app.route("/student-certificate-download/<int:certificate_id>")
 def student_certificate_download(certificate_id):
@@ -214,6 +307,288 @@ def student_certificate_download(certificate_id):
         as_attachment=True,
         download_name=certificate["file_name"]
     )
+@app.route("/student-register", methods=["GET", "POST"])
+def student_register():
+
+    message = None
+    error = None
+
+    if request.method == "POST":
+
+        roll_no = request.form["roll_no"].strip()
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+
+        if not roll_no or not username or not password or not confirm_password:
+            error = "All fields are required."
+
+        elif password != confirm_password:
+            error = "Passwords do not match."
+
+        elif len(password) < 6:
+            error = "Password must be at least 6 characters."
+
+        else:
+
+            db = get_db_connection()
+            cursor = db.cursor(dictionary=True)
+
+            # Check registered student by roll number
+            cursor.execute("""
+                SELECT id, roll_no, university_roll_no, student_name
+                FROM students
+                WHERE roll_no = %s OR university_roll_no = %s
+            """, (roll_no, roll_no))
+
+            student = cursor.fetchone()
+
+            if not student:
+                error = "No student found with this registration / roll number."
+
+            else:
+
+                # Check whether account already exists
+                cursor.execute("""
+                    SELECT id
+                    FROM student_users
+                    WHERE student_id = %s
+                """, (student["id"],))
+
+                existing_account = cursor.fetchone()
+
+                if existing_account:
+                    error = "An account already exists for this student."
+
+                else:
+
+                    # Check username availability
+                    cursor.execute("""
+                        SELECT id
+                        FROM student_users
+                        WHERE username = %s
+                    """, (username,))
+
+                    existing_username = cursor.fetchone()
+
+                    if existing_username:
+                        error = "Username already exists. Please choose another username."
+
+                    else:
+
+                        hashed_password = generate_password_hash(password)
+
+                        cursor.execute("""
+                            INSERT INTO student_users
+                            (student_id, username, password)
+                            VALUES (%s, %s, %s)
+                        """, (
+                            student["id"],
+                            username,
+                            hashed_password
+                        ))
+
+                        db.commit()
+
+                        message = (
+                            "Account created successfully. "
+                            "You can now login using your username and password."
+                        )
+
+            cursor.close()
+            db.close()
+
+    return render_template(
+        "student_register.html",
+        message=message,
+        error=error
+    )
+    
+
+@app.route("/manage-subjects", methods=["GET", "POST"])
+def manage_subjects():
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    error = None
+    success = None
+
+    try:
+        if request.method == "POST":
+            subject_name = request.form.get("subject_name", "").strip()
+            subject_code = request.form.get("subject_code", "").strip().upper()
+
+            try:
+                internal_max_marks = int(request.form.get("internal_max_marks", ""))
+                external_max_marks = int(request.form.get("external_max_marks", ""))
+            except ValueError:
+                internal_max_marks = -1
+                external_max_marks = -1
+
+            if not subject_name or not subject_code:
+                error = "Please enter subject name and subject code."
+
+            elif internal_max_marks < 0 or external_max_marks < 0:
+                error = "Enter valid non-negative marks."
+
+            elif internal_max_marks + external_max_marks <= 0:
+                error = "Total maximum marks must be greater than zero."
+
+            else:
+                try:
+                    cursor.execute("""
+                        INSERT INTO subjects
+                        (subject_name, subject_code,
+                         internal_max_marks, external_max_marks)
+                        VALUES (%s, %s, %s, %s)
+                    """, (
+                        subject_name,
+                        subject_code,
+                        internal_max_marks,
+                        external_max_marks
+                    ))
+
+                    db.commit()
+                    success = "Subject and marks distribution added successfully!"
+
+                except IntegrityError:
+                    db.rollback()
+                    error = "This subject name or subject code already exists."
+
+        cursor.execute("""
+            SELECT id, subject_name, subject_code,
+                   internal_max_marks, external_max_marks
+            FROM subjects
+            ORDER BY subject_name
+        """)
+        subjects = cursor.fetchall()
+
+        return render_template(
+            "manage_subjects.html",
+            subjects=subjects,
+            error=error,
+            success=success
+        )
+
+    finally:
+        cursor.close()
+        db.close()      
+
+@app.route("/delete-subject/<int:subject_id>", methods=["POST"])
+def delete_subject(subject_id):
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    try:
+        cursor.execute(
+            "DELETE FROM subjects WHERE id = %s",
+            (subject_id,)
+        )
+        db.commit()
+
+        return redirect("/manage-subjects")
+
+    except Exception:
+        db.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        db.close()
+        
+
+@app.route("/edit-subject/<int:subject_id>", methods=["GET", "POST"])
+def edit_subject(subject_id):
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id, subject_name, subject_code,
+                   internal_max_marks, external_max_marks
+            FROM subjects
+            WHERE id = %s
+        """, (subject_id,))
+        subject = cursor.fetchone()
+
+        if not subject:
+            return "Subject not found", 404
+
+        error = None
+
+        if request.method == "POST":
+            subject_name = request.form.get("subject_name", "").strip()
+            subject_code = request.form.get("subject_code", "").strip().upper()
+
+            try:
+                internal_max_marks = int(
+                    request.form.get("internal_max_marks", "")
+                )
+                external_max_marks = int(
+                    request.form.get("external_max_marks", "")
+                )
+            except ValueError:
+                internal_max_marks = -1
+                external_max_marks = -1
+
+            if not subject_name or not subject_code:
+                error = "Please enter subject name and subject code."
+
+            elif internal_max_marks < 0 or external_max_marks < 0:
+                error = "Marks must be valid non-negative numbers."
+
+            elif internal_max_marks + external_max_marks <= 0:
+                error = "Total maximum marks must be greater than zero."
+
+            else:
+                try:
+                    cursor.execute("""
+                        UPDATE subjects
+                        SET subject_name = %s,
+                            subject_code = %s,
+                            internal_max_marks = %s,
+                            external_max_marks = %s
+                        WHERE id = %s
+                    """, (
+                        subject_name,
+                        subject_code,
+                        internal_max_marks,
+                        external_max_marks,
+                        subject_id
+                    ))
+
+                    db.commit()
+                    return redirect("/manage-subjects")
+
+                except IntegrityError:
+                    db.rollback()
+                    error = "Subject name or subject code already exists."
+
+            subject.update({
+                "subject_name": subject_name,
+                "subject_code": subject_code,
+                "internal_max_marks": internal_max_marks,
+                "external_max_marks": external_max_marks
+            })
+
+        return render_template(
+            "edit_subject.html",
+            subject=subject,
+            error=error
+        )
+
+    finally:
+        cursor.close()
+        db.close()
 
 @app.route("/student-login", methods=["GET", "POST"])
 def student_login():
@@ -300,6 +675,268 @@ def student_dashboard():
         student_roll_no=session.get("student_roll_no"),
         unread_count=unread_count
     )
+    
+
+@app.route("/student-ranking")
+def student_ranking():
+    if "student_id" not in session:
+        return redirect("/student-login")
+
+    current_student_id = session["student_id"]
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                students.id,
+                students.roll_no,
+                students.student_name,
+                COALESCE(SUM(marks.marks), 0) AS total_marks,
+                COALESCE(SUM(marks.max_marks), 0) AS max_marks
+            FROM students
+            LEFT JOIN marks
+                ON students.id = marks.student_id
+            GROUP BY
+                students.id,
+                students.roll_no,
+                students.student_name
+        """)
+
+        students_data = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        db.close()
+
+    for student in students_data:
+        total = float(student["total_marks"] or 0)
+        maximum = float(student["max_marks"] or 0)
+
+        student["percentage"] = (
+            round((total / maximum) * 100, 2)
+            if maximum > 0 else 0
+        )
+
+    # Rank only students who have recorded marks.
+    ranked_students = [
+        student for student in students_data
+        if student["max_marks"] > 0
+    ]
+
+    ranked_students.sort(
+        key=lambda student: (
+            student["percentage"],
+            student["total_marks"]
+        ),
+        reverse=True
+    )
+
+    for rank, student in enumerate(ranked_students, start=1):
+        student["rank"] = rank
+
+    my_ranking = next(
+        (
+            student for student in ranked_students
+            if student["id"] == current_student_id
+        ),
+        None
+    )
+
+    return render_template(
+        "student_ranking.html",
+        my_ranking=my_ranking,
+        total_ranked=len(ranked_students)
+    )
+    
+
+@app.route("/my-subject-analysis")
+def my_subject_analysis():
+    if "student_id" not in session:
+        return redirect("/student-login")
+
+    student_id = session["student_id"]
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                students.roll_no,
+                students.student_name,
+                marks.subject,
+                SUM(marks.marks) AS total_marks,
+                SUM(marks.max_marks) AS max_marks
+            FROM students
+            INNER JOIN marks
+                ON students.id = marks.student_id
+            WHERE students.id = %s
+            GROUP BY
+                students.roll_no,
+                students.student_name,
+                marks.subject
+            ORDER BY marks.subject
+        """, (student_id,))
+
+        results = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        db.close()
+
+    for row in results:
+        total = float(row["total_marks"] or 0)
+        maximum = float(row["max_marks"] or 0)
+
+        row["percentage"] = (
+            round((total / maximum) * 100, 2)
+            if maximum > 0 else 0
+        )
+
+        if maximum == 0:
+            row["status"] = "No marks"
+            row["suggestion"] = "Please check the marks data."
+        elif row["percentage"] < 50:
+            row["status"] = "Needs Improvement"
+            row["suggestion"] = (
+                "Practice regularly and focus on basic concepts."
+            )
+        elif row["percentage"] < 70:
+            row["status"] = "Average"
+            row["suggestion"] = (
+                "Revise regularly and practice more questions."
+            )
+        else:
+            row["status"] = "Good"
+            row["suggestion"] = (
+                "Keep up the good performance."
+            )
+
+    return render_template(
+        "my_subject_analysis.html",
+        results=results,
+        student_name=session.get("student_name")
+    )
+    
+    
+
+@app.route("/my-result-summary")
+def my_result_summary():
+    if "student_id" not in session:
+        return redirect("/student-login")
+
+    student_id = session["student_id"]
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                students.id,
+                students.roll_no,
+                students.student_name,
+                COALESCE(SUM(marks.marks), 0) AS total_marks,
+                COALESCE(SUM(marks.max_marks), 0) AS max_marks
+            FROM students
+            LEFT JOIN marks
+                ON students.id = marks.student_id
+            WHERE students.id = %s
+            GROUP BY
+                students.id,
+                students.roll_no,
+                students.student_name
+        """, (student_id,))
+
+        student = cursor.fetchone()
+
+    finally:
+        cursor.close()
+        db.close()
+
+    if student is None:
+        return redirect("/student-login")
+
+    total = float(student["total_marks"] or 0)
+    maximum = float(student["max_marks"] or 0)
+
+    student["percentage"] = (
+        round((total / maximum) * 100, 2)
+        if maximum > 0 else 0
+    )
+
+    percentage = student["percentage"]
+
+    if maximum == 0:
+        student["grade"] = "-"
+        student["result"] = "No Result"
+    elif percentage >= 90:
+        student["grade"] = "A+"
+        student["result"] = "Pass"
+    elif percentage >= 80:
+        student["grade"] = "A"
+        student["result"] = "Pass"
+    elif percentage >= 70:
+        student["grade"] = "B"
+        student["result"] = "Pass"
+    elif percentage >= 60:
+        student["grade"] = "C"
+        student["result"] = "Pass"
+    elif percentage >= 50:
+        student["grade"] = "D"
+        student["result"] = "Pass"
+    else:
+        student["grade"] = "F"
+        student["result"] = "Fail"
+
+    return render_template(
+        "my_result_summary.html",
+        student=student
+    )
+    
+@app.route("/student-upload-photo", methods=["POST"])
+def student_upload_photo():
+    if "student_id" not in session:
+        return redirect("/student-login")
+
+    if "photo" not in request.files:
+        return redirect("/student-profile")
+
+    photo = request.files["photo"]
+
+    if photo.filename == "":
+        return redirect("/student-profile")
+
+    if not allowed_file(photo.filename):
+        return "Only PNG, JPG, JPEG and WEBP images are allowed.", 400
+
+    extension = photo.filename.rsplit(".", 1)[1].lower()
+    filename = f"student_{session['student_id']}.{extension}"
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    try:
+        # Save photo filename in the student's database record
+        cursor.execute(
+            "UPDATE students SET profile_photo = %s WHERE id = %s",
+            (filename, session["student_id"])
+        )
+        db.commit()
+        photo.save(filepath)
+
+    except Exception:
+        db.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        db.close()
+
+    return redirect("/student-profile")
 
 @app.route("/student-profile")
 def student_profile():
@@ -312,13 +949,15 @@ def student_profile():
 
     cursor.execute("""
         SELECT
-            id,
-            roll_no,
-            student_name,
-            course,
-            semester,
-            email,
-            phone
+        id,
+        roll_no,
+        university_roll_no,
+        student_name,
+        course,
+        semester,
+        email,
+        phone,
+        profile_photo
         FROM students
         WHERE id = %s
     """, (session["student_id"],))
@@ -335,7 +974,37 @@ def student_profile():
         "student_profile.html",
         student=student
     )
-    
+
+
+@app.route("/update-student-profile", methods=["POST"])
+def update_student_profile():
+    if "student_id" not in session:
+        return redirect("/student-login")
+
+    email = request.form.get("email", "").strip()
+    phone = request.form.get("phone", "").strip()
+
+    if not email or not phone:
+        return "Email and phone are required.", 400
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE students
+            SET email = %s, phone = %s
+            WHERE id = %s
+        """, (email, phone, session["student_id"]))
+
+        db.commit()
+    finally:
+        cursor.close()
+        db.close()
+
+    return redirect("/student-profile")
+
+
 @app.route("/student-marks")
 def student_marks():
 
@@ -1553,7 +2222,7 @@ def student_logout():
 @app.route("/student-change-password", methods=["GET", "POST"])
 def student_change_password():
 
-    if "student_id" not in session:
+    if "student_user_id" not in session or "student_id" not in session:
         return redirect("/student-login")
 
     message = None
@@ -1561,61 +2230,78 @@ def student_change_password():
 
     if request.method == "POST":
 
-        current_password = request.form["current_password"]
-        new_password = request.form["new_password"]
-        confirm_password = request.form["confirm_password"]
+        current_password = request.form.get("current_password", "")
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
 
-        db = get_db_connection()
-        cursor = db.cursor(dictionary=True)
+        if not current_password or not new_password or not confirm_password:
+            error = "All fields are required."
 
-        cursor.execute("""
-            SELECT password
-            FROM student_users
-            WHERE id = %s
-        """, (session["student_user_id"],))
-
-        student_user = cursor.fetchone()
-
-        if not student_user:
-            cursor.close()
-            db.close()
-            return redirect("/student-login")
-
-        # Check current password
-        if not check_password_hash(
-            student_user["password"],
-            current_password
-        ):
-            error = "Current password is incorrect."
-
-        # Check new password
         elif new_password != confirm_password:
             error = "New password and confirm password do not match."
 
-        elif len(new_password) < 6:
-            error = "New password must be at least 6 characters."
+        elif len(new_password) < 8:
+            error = "New password must be at least 8 characters."
+
+        elif current_password == new_password:
+            error = "New password must be different from the current password."
 
         else:
+            db = None
+            cursor = None
 
-            hashed_password = generate_password_hash(
-                new_password
-            )
+            try:
+                db = get_db_connection()
+                cursor = db.cursor(dictionary=True)
 
-            cursor.execute("""
-                UPDATE student_users
-                SET password = %s
-                WHERE id = %s
-            """, (
-                hashed_password,
-                session["student_user_id"]
-            ))
+                cursor.execute("""
+                    SELECT password
+                    FROM student_users
+                    WHERE id = %s AND student_id = %s
+                """, (
+                    session["student_user_id"],
+                    session["student_id"]
+                ))
 
-            db.commit()
+                student_user = cursor.fetchone()
 
-            message = "Password changed successfully."
+                if not student_user:
+                    error = "Student account not found. Please login again."
 
-        cursor.close()
-        db.close()
+                elif not check_password_hash(
+                    student_user["password"],
+                    current_password
+                ):
+                    error = "Current password is incorrect."
+
+                else:
+                    hashed_password = generate_password_hash(new_password)
+
+                    cursor.execute("""
+                        UPDATE student_users
+                        SET password = %s
+                        WHERE id = %s AND student_id = %s
+                    """, (
+                        hashed_password,
+                        session["student_user_id"],
+                        session["student_id"]
+                    ))
+
+                    db.commit()
+                    message = "Password changed successfully."
+
+            except Exception:
+                if db:
+                    db.rollback()
+
+                error = "Unable to change password. Please try again."
+
+            finally:
+                if cursor:
+                    cursor.close()
+
+                if db:
+                    db.close()
 
     return render_template(
         "student_change_password.html",
@@ -2565,47 +3251,129 @@ def dashboard():
 # ADD STUDENT
 # =========================
 
+
 @app.route("/add-student", methods=["GET", "POST"])
 def add_student():
     if "user_id" not in session:
         return redirect("/")
 
-    if request.method == "POST":
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
 
-        roll_no = request.form["roll_no"]
-        student_name = request.form["student_name"]
-        course = request.form["course"]
-        semester = request.form["semester"]
-        email = request.form["email"]
-        phone = request.form["phone"]
+    try:
+        if request.method == "POST":
+            roll_no = request.form["roll_no"].strip()
+            university_roll_no = (
+                request.form.get("university_roll_no", "").strip() or None
+            )
+            student_name = request.form["student_name"].strip()
+            course = request.form["course"].strip()
+            semester = request.form["semester"]
+            email = request.form["email"].strip()
+            phone = request.form["phone"].strip()
 
-        db = get_db_connection()
-        cursor = db.cursor()
+            # Subjects selected by admin
+            subject_ids = list(set(
+                request.form.getlist("subject_ids")
+            ))
 
-        query = """
-        INSERT INTO students
-        (roll_no, student_name, course, semester, email, phone)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """
+            if not subject_ids:
+                cursor.execute(
+                    "SELECT id, subject_name FROM subjects ORDER BY subject_name"
+                )
+                subjects = cursor.fetchall()
 
-        values = (
-            roll_no,
-            student_name,
-            course,
-            semester,
-            email,
-            phone
+                return render_template(
+                    "add_student.html",
+                    subjects=subjects,
+                    error="Please select at least one subject."
+                )
+
+            # Validate selected subject IDs
+            cursor.execute(
+                "SELECT id FROM subjects WHERE id IN ("
+                + ",".join(["%s"] * len(subject_ids))
+                + ")",
+                tuple(subject_ids)
+            )
+            valid_ids = {str(row["id"]) for row in cursor.fetchall()}
+
+            if valid_ids != set(subject_ids):
+                raise ValueError("Invalid subject selection.")
+
+            # Create student and save assignments together
+            #db.start_transaction()
+
+            cursor.execute("""
+                INSERT INTO students
+                (roll_no, university_roll_no, student_name,
+                 course, semester, email, phone)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                roll_no,
+                university_roll_no,
+                student_name,
+                course,
+                semester,
+                email,
+                phone
+            ))
+
+            student_id = cursor.lastrowid
+
+            cursor.executemany("""
+                INSERT INTO student_subjects (student_id, subject_id)
+                VALUES (%s, %s)
+            """, [
+                (student_id, int(subject_id))
+                for subject_id in subject_ids
+            ])
+
+            db.commit()
+            return redirect("/students")
+
+        # Show available subjects on the admission form
+        cursor.execute("""
+            SELECT id, subject_name
+            FROM subjects
+            ORDER BY subject_name
+        """)
+        subjects = cursor.fetchall()
+
+        return render_template(
+            "add_student.html",
+            subjects=subjects
+        )
+        
+    except IntegrityError as e:
+        db.rollback()
+
+        cursor.execute("""
+            SELECT id, subject_name
+            FROM subjects
+            ORDER BY subject_name
+        """)
+        subjects = cursor.fetchall()
+
+        error_message = "This roll number already exists. Please enter a different roll number."
+
+        if "university_roll_no" in str(e):
+            error_message = "This university roll number already exists. Please enter a different one."
+
+        return render_template(
+            "add_student.html",
+            subjects=subjects,
+            error=error_message
         )
 
-        cursor.execute(query, values)
-        db.commit()
+    except Exception:
+        db.rollback()
+        raise
 
+    finally:
         cursor.close()
         db.close()
 
-        return redirect("/students")
-
-    return render_template("add_student.html")
 
 @app.route("/students")
 def students():
@@ -2760,165 +3528,116 @@ def add_marks():
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
-    if request.method == "POST":
+    try:
+        if request.method == "POST":
+            student_id = request.form.get("student_id", "").strip()
+            subject = request.form.get("subject", "").strip()
 
-        student_id = request.form["student_id"]
-        subject = request.form["subject"]
+            try:
+                internal_marks = float(request.form.get("internal_marks", ""))
+                external_marks = float(request.form.get("external_marks", ""))
+            except (ValueError, TypeError):
+                cursor.execute("SELECT * FROM students ORDER BY student_name")
+                students_data = cursor.fetchall()
+                cursor.execute("""
+                    SELECT subject_name, subject_code,
+                           internal_max_marks, external_max_marks
+                    FROM subjects
+                    ORDER BY subject_name
+                """)
+                subjects_data = cursor.fetchall()
 
-        try:
-            marks = float(request.form["marks"])
-            max_marks = float(request.form["max_marks"])
-        except ValueError:
+                return render_template(
+                    "add_marks.html",
+                    students=students_data,
+                    subjects=subjects_data,
+                    error="Please enter valid numeric marks."
+                )
 
-            cursor.execute(
-                "SELECT * FROM students ORDER BY student_name"
-            )
+            cursor.execute("""
+                SELECT subject_name, internal_max_marks, external_max_marks
+                FROM subjects
+                WHERE subject_name = %s
+            """, (subject,))
+            subject_data = cursor.fetchone()
 
-            students_data = cursor.fetchall()
+            if not student_id or not subject_data:
+                error = "Please select a valid student and subject."
+            elif internal_marks < 0 or external_marks < 0:
+                error = "Marks cannot be negative."
+            elif internal_marks > float(subject_data["internal_max_marks"]):
+                error = (
+                    "Internal marks cannot exceed "
+                    f'{subject_data["internal_max_marks"]}.'
+                )
+            elif external_marks > float(subject_data["external_max_marks"]):
+                error = (
+                    "External marks cannot exceed "
+                    f'{subject_data["external_max_marks"]}.'
+                )
+            else:
+                error = None
 
-            cursor.close()
-            db.close()
+            if error:
+                cursor.execute("SELECT * FROM students ORDER BY student_name")
+                students_data = cursor.fetchall()
+                cursor.execute("""
+                    SELECT subject_name, subject_code,
+                           internal_max_marks, external_max_marks
+                    FROM subjects
+                    ORDER BY subject_name
+                """)
+                subjects_data = cursor.fetchall()
 
-            return render_template(
-                "add_marks.html",
-                students=students_data,
-                error="Please enter valid numeric marks."
-            )
+                return render_template(
+                    "add_marks.html",
+                    students=students_data,
+                    subjects=subjects_data,
+                    error=error
+                )
 
-        # =========================
-        # MARKS VALIDATION
-        # =========================
+            internal_max = float(subject_data["internal_max_marks"])
+            external_max = float(subject_data["external_max_marks"])
+            total_marks = internal_marks + external_marks
+            total_max = internal_max + external_max
 
-        if max_marks <= 0:
+            cursor.execute("""
+                INSERT INTO marks
+                (
+                    student_id, subject, marks, max_marks,
+                    internal_marks, internal_max_marks,
+                    external_marks, external_max_marks
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                int(student_id), subject, total_marks, total_max,
+                internal_marks, internal_max,
+                external_marks, external_max
+            ))
 
-            cursor.execute(
-                "SELECT * FROM students ORDER BY student_name"
-            )
+            db.commit()
+            return redirect("/marks")
 
-            students_data = cursor.fetchall()
+        cursor.execute("SELECT * FROM students ORDER BY student_name")
+        students_data = cursor.fetchall()
 
-            cursor.close()
-            db.close()
+        cursor.execute("""
+            SELECT subject_name, subject_code,
+                   internal_max_marks, external_max_marks
+            FROM subjects
+            ORDER BY subject_name
+        """)
+        subjects_data = cursor.fetchall()
 
-            return render_template(
-                "add_marks.html",
-                students=students_data,
-                error="Maximum marks must be greater than 0."
-            )
-
-        if marks < 0:
-
-            cursor.execute(
-                "SELECT * FROM students ORDER BY student_name"
-            )
-
-            students_data = cursor.fetchall()
-
-            cursor.close()
-            db.close()
-
-            return render_template(
-                "add_marks.html",
-                students=students_data,
-                error="Marks cannot be negative."
-            )
-
-        if marks > max_marks:
-
-            cursor.execute(
-                "SELECT * FROM students ORDER BY student_name"
-            )
-
-            students_data = cursor.fetchall()
-
-            cursor.close()
-            db.close()
-
-            return render_template(
-                "add_marks.html",
-                students=students_data,
-                error="Marks cannot be greater than maximum marks."
-            )
-
-        # =========================
-        # SAVE MARKS
-        # =========================
-
-        query = """
-        INSERT INTO marks
-        (student_id, subject, marks, max_marks)
-        VALUES (%s, %s, %s, %s)
-        """
-
-        values = (
-            student_id,
-            subject,
-            marks,
-            max_marks
+        return render_template(
+            "add_marks.html",
+            students=students_data,
+            subjects=subjects_data
         )
 
-        cursor.execute(query, values)
-        db.commit()
-
+    finally:
         cursor.close()
         db.close()
-
-        return redirect("/marks")
-
-    # =========================
-    # LOAD STUDENTS
-    # =========================
-
-    cursor.execute(
-        "SELECT * FROM students ORDER BY student_name"
-    )
-
-    students_data = cursor.fetchall()
-
-    cursor.close()
-    db.close()
-
-    return render_template(
-        "add_marks.html",
-        students=students_data
-    )
-
-# =========================
-# MARKS LIST
-# =========================
-
-@app.route("/marks")
-def marks():
-    if "user_id" not in session:
-        return redirect("/")
-    db = get_db_connection()
-    cursor = db.cursor(dictionary=True)
-
-    query = """
-    SELECT marks.id,
-           students.roll_no,
-           students.student_name,
-           marks.subject,
-           marks.marks,
-           marks.max_marks
-    FROM marks
-    JOIN students
-    ON marks.student_id = students.id
-    ORDER BY marks.id DESC
-    """
-
-    cursor.execute(query)
-
-    marks_data = cursor.fetchall()
-
-    cursor.close()
-    db.close()
-
-    return render_template(
-        "marks.html",
-        marks=marks_data
-    )
-
 # =========================
 # ADD ATTENDANCE
 # =========================
@@ -4124,176 +4843,163 @@ def delete_attendance(id):
 
 # =========================
 # ATTENDANCE LIST
-# =========================
+
+
 @app.route("/performance")
 def performance():
     if "user_id" not in session:
         return redirect("/")
-    # Search value
+
     search = request.args.get("search", "").strip()
 
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
-    # =========================
-    # OVERALL PERFORMANCE
-    # =========================
+    try:
+        # OVERALL PERFORMANCE
+        if search:
+            query = """
+                SELECT
+                    students.id,
+                    students.roll_no,
+                    students.student_name,
+                    SUM(marks.marks) AS total_marks,
+                    SUM(marks.max_marks) AS max_marks
+                FROM students
+                JOIN marks ON students.id = marks.student_id
+                WHERE students.student_name LIKE %s
+                   OR students.roll_no LIKE %s
+                GROUP BY students.id,
+                         students.roll_no,
+                         students.student_name
+                ORDER BY students.student_name
+            """
+            search_value = "%" + search + "%"
+            cursor.execute(query, (search_value, search_value))
+        else:
+            cursor.execute("""
+                SELECT
+                    students.id,
+                    students.roll_no,
+                    students.student_name,
+                    SUM(marks.marks) AS total_marks,
+                    SUM(marks.max_marks) AS max_marks
+                FROM students
+                JOIN marks ON students.id = marks.student_id
+                GROUP BY students.id,
+                         students.roll_no,
+                         students.student_name
+                ORDER BY students.student_name
+            """)
 
-    if search:
+        performance_data = cursor.fetchall()
 
-        query = """
-        SELECT
-            students.roll_no,
-            students.student_name,
-            SUM(marks.marks) AS total_marks,
-            SUM(marks.max_marks) AS max_marks
-        FROM students
-        JOIN marks
-        ON students.id = marks.student_id
-        WHERE students.student_name LIKE %s
-           OR students.roll_no LIKE %s
-        GROUP BY students.id,
-                 students.roll_no,
-                 students.student_name
-        ORDER BY students.student_name
-        """
+        # PERCENTAGE AND GRADE
+        for student in performance_data:
+            total = float(student["total_marks"] or 0)
+            maximum = float(student["max_marks"] or 0)
 
-        search_value = "%" + search + "%"
+            student["percentage"] = (
+                round((total / maximum) * 100, 2)
+                if maximum > 0 else 0
+            )
 
-        cursor.execute(
-            query,
-            (search_value, search_value)
+            percentage = student["percentage"]
+
+            if percentage >= 90:
+                student["grade"] = "A+"
+            elif percentage >= 80:
+                student["grade"] = "A"
+            elif percentage >= 70:
+                student["grade"] = "B"
+            elif percentage >= 60:
+                student["grade"] = "C"
+            elif percentage >= 50:
+                student["grade"] = "D"
+            else:
+                student["grade"] = "F"
+
+        # TOP PERFORMER
+        top_performer = (
+            max(performance_data,
+                key=lambda student: student["percentage"])
+            if performance_data else None
         )
 
-    else:
+        # STUDENTS NEEDING IMPROVEMENT
+        needs_improvement = (
+            min(performance_data,
+                key=lambda student: student["percentage"])
+            if performance_data else None
+        )
 
+        # PERFORMANCE WARNING LIST
+        performance_warning_list = []
+
+        for student in performance_data:
+            percentage = student["percentage"]
+
+            if percentage < 50:
+                status = "Critical"
+            elif percentage < 60:
+                status = "Needs Improvement"
+            elif percentage < 75:
+                status = "Average"
+            else:
+                status = "Good"
+
+            performance_warning_list.append({
+                "student_name": student["student_name"],
+                "roll_no": student["roll_no"],
+                "percentage": percentage,
+                "status": status
+            })
+
+        # WEAK SUBJECTS
+        weak_subjects = []
         cursor.execute("""
             SELECT
                 students.roll_no,
                 students.student_name,
-                SUM(marks.marks) AS total_marks,
+                marks.subject,
+                SUM(marks.marks) AS marks,
                 SUM(marks.max_marks) AS max_marks
             FROM students
-            JOIN marks
-            ON students.id = marks.student_id
+            JOIN marks ON students.id = marks.student_id
             GROUP BY students.id,
                      students.roll_no,
-                     students.student_name
-            ORDER BY students.student_name
+                     students.student_name,
+                     marks.subject
+            HAVING SUM(marks.max_marks) > 0
+               AND (SUM(marks.marks) / SUM(marks.max_marks)) * 100 < 50
+            ORDER BY (SUM(marks.marks) / SUM(marks.max_marks)) ASC
         """)
+        weak_subjects = cursor.fetchall()
 
-    performance_data = cursor.fetchall()
+        for subject in weak_subjects:
+            total = float(subject["marks"] or 0)
+            maximum = float(subject["max_marks"] or 0)
+            subject["percentage"] = (
+                round((total / maximum) * 100, 2)
+                if maximum > 0 else 0
+            )
 
-
-    # =========================
-    # PERCENTAGE + GRADE
-    # =========================
-
-    for student in performance_data:
-
-        if student["max_marks"] > 0:
-
-            student["percentage"] = (
-                student["total_marks"] /
-                student["max_marks"]
-            ) * 100
-
-        else:
-
-            student["percentage"] = 0
-
-
-        percentage = student["percentage"]
-
-
-        if percentage >= 90:
-            student["grade"] = "A+"
-
-        elif percentage >= 80:
-            student["grade"] = "A"
-
-        elif percentage >= 70:
-            student["grade"] = "B"
-
-        elif percentage >= 60:
-            student["grade"] = "C"
-
-        elif percentage >= 50:
-            student["grade"] = "D"
-
-        else:
-            student["grade"] = "F"
-
-
-    # =========================
-    # TOP PERFORMER
-    # =========================
-
-    top_performer = None
-
-    if performance_data:
-
-        top_performer = max(
-            performance_data,
-            key=lambda student: student["percentage"]
+        # SHOW PAGE
+        return render_template(
+            "performance.html",
+            performance=performance_data,
+            top_performer=top_performer,
+            needs_improvement=needs_improvement,
+            weak_subjects=weak_subjects,
+            performance_warning_list=performance_warning_list,
+            search=search
         )
-        needs_improvement = cursor.fetchone()
-        if needs_improvement:
-            needs_improvement_percentage = round(
-        (
-            needs_improvement["total_marks"]
-            / needs_improvement["max_marks"]
-        ) * 100,
-        2
-    )
-            needs_improvement["percentage"] = needs_improvement_percentage
-        else:
-            needs_improvement_percentage = 0
-            
-            # PERFORMANCE WARNING LIST
-            cursor.execute("""
-                           SELECT
-                           students.student_name,
-                           students.roll_no,
-                           SUM(marks.marks) AS total_marks,
-                           SUM(marks.max_marks) AS max_marks
-                           FROM students
-                           JOIN marks
-                           ON students.id = marks.student_id
-                           GROUP BY
-                           students.id,
-                           students.student_name,
-                           students.roll_no
-                           ORDER BY
-                           (SUM(marks.marks) / SUM(marks.max_marks)) ASC
-                           """)
-            performance_warning_data = cursor.fetchall()
 
-            performance_warning_list = []
+    finally:
+        cursor.close()
+        db.close()
 
-            for student in performance_warning_data:
-                total_marks = float(student["total_marks"] or 0)
-                max_marks = float(student["max_marks"] or 0)
-                if max_marks > 0:
-                    percentage = (total_marks / max_marks) * 100
-    else:
-        percentage = 0
 
-    if percentage < 50:
-        status = "Critical"
-    elif percentage < 60:
-        status = "Needs Improvement"
-    elif percentage < 75:
-        status = "Average"
-    else:
-        status = "Good"
-
-    performance_warning_list.append({
-        "student_name": student["student_name"],
-        "roll_no": student["roll_no"],
-        "percentage": round(percentage, 2),
-        "status": status
-    })
     
     
 # =========================
@@ -4406,7 +5112,194 @@ def report():
         percentage=percentage,
         grade=grade
     )
+    
+from io import BytesIO
+from flask import send_file
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle
+)
 
+
+@app.route("/download-report/<int:student_id>")
+def download_student_report(student_id):
+
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id, roll_no, student_name
+            FROM students
+            WHERE id = %s
+        """, (student_id,))
+
+        student = cursor.fetchone()
+
+        if not student:
+            return "Student not found.", 404
+
+        cursor.execute("""
+            SELECT subject, marks, max_marks
+            FROM marks
+            WHERE student_id = %s
+            ORDER BY subject
+        """, (student_id,))
+
+        records = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        db.close()
+
+    total_marks = sum(
+        float(row["marks"] or 0) for row in records
+    )
+
+    max_marks = sum(
+        float(row["max_marks"] or 0) for row in records
+    )
+
+    percentage = (
+        (total_marks / max_marks) * 100
+        if max_marks > 0 else 0
+    )
+
+    if percentage >= 90:
+        grade = "A+"
+    elif percentage >= 80:
+        grade = "A"
+    elif percentage >= 70:
+        grade = "B"
+    elif percentage >= 60:
+        grade = "C"
+    elif percentage >= 50:
+        grade = "D"
+    else:
+        grade = "F"
+
+    buffer = BytesIO()
+
+    pdf = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=0.6 * inch,
+        leftMargin=0.6 * inch,
+        topMargin=0.6 * inch,
+        bottomMargin=0.6 * inch
+    )
+
+    styles = getSampleStyleSheet()
+    story = []
+
+    story.append(Paragraph(
+        "Student Performance Report",
+        styles["Title"]
+    ))
+    story.append(Spacer(1, 18))
+
+    story.append(Paragraph(
+        f"<b>Student Name:</b> {student['student_name']}",
+        styles["Normal"]
+    ))
+    story.append(Paragraph(
+        f"<b>Roll Number:</b> {student['roll_no'] or '-'}",
+        styles["Normal"]
+    ))
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph(
+        "<b>Academic Summary</b>",
+        styles["Heading2"]
+    ))
+
+    summary_data = [
+        ["Total Marks", "Maximum Marks", "Percentage", "Grade"],
+        [
+            f"{total_marks:g}",
+            f"{max_marks:g}",
+            f"{percentage:.2f}%",
+            grade
+        ]
+    ]
+
+    summary_table = Table(
+        summary_data,
+        colWidths=[1.55 * inch] * 4
+    )
+
+    summary_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#243f87")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("PADDING", (0, 0), (-1, -1), 8),
+        ("BACKGROUND", (0, 1), (-1, 1), colors.HexColor("#eef3ff"))
+    ]))
+
+    story.append(summary_table)
+    story.append(Spacer(1, 20))
+
+    story.append(Paragraph(
+        "<b>Subject-wise Marks</b>",
+        styles["Heading2"]
+    ))
+    story.append(Spacer(1, 8))
+
+    marks_data = [["Subject", "Marks Obtained", "Maximum Marks"]]
+
+    for row in records:
+        marks_data.append([
+            str(row["subject"] or "-"),
+            f"{float(row['marks'] or 0):g}",
+            f"{float(row['max_marks'] or 0):g}"
+        ])
+
+    if not records:
+        marks_data.append(["No marks recorded", "-", "-"])
+
+    marks_table = Table(
+        marks_data,
+        colWidths=[3.2 * inch, 1.6 * inch, 1.6 * inch],
+        repeatRows=1
+    )
+
+    marks_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#243f87")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("ALIGN", (1, 1), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("PADDING", (0, 0), (-1, -1), 8),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [
+            colors.white,
+            colors.HexColor("#eef3ff")
+        ])
+    ]))
+
+    story.append(marks_table)
+
+    pdf.build(story)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"student_report_{student_id}.pdf"
+    )
 
 # =========================
 # PERFORMANCE CHARTS
@@ -4586,6 +5479,224 @@ def charts():
         practical_labels=practical_labels,
         practical_values=practical_values
     )
+    
+@app.route("/leaderboard")
+def leaderboard():
+
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                students.id,
+                students.roll_no,
+                students.student_name,
+                COALESCE(SUM(marks.marks), 0) AS total_marks,
+                COALESCE(SUM(marks.max_marks), 0) AS max_marks
+            FROM students
+            LEFT JOIN marks
+                ON students.id = marks.student_id
+            GROUP BY
+                students.id,
+                students.roll_no,
+                students.student_name
+        """)
+
+        students_data = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        db.close()
+
+    for student in students_data:
+        total = float(student["total_marks"] or 0)
+        maximum = float(student["max_marks"] or 0)
+
+        student["percentage"] = (
+            round((total / maximum) * 100, 2)
+            if maximum > 0 else 0
+        )
+
+        percentage = student["percentage"]
+
+        if maximum == 0:
+            student["grade"] = "-"
+        elif percentage >= 90:
+            student["grade"] = "A+"
+        elif percentage >= 80:
+            student["grade"] = "A"
+        elif percentage >= 70:
+            student["grade"] = "B"
+        elif percentage >= 60:
+            student["grade"] = "C"
+        elif percentage >= 50:
+            student["grade"] = "D"
+        else:
+            student["grade"] = "F"
+
+    students_data.sort(
+        key=lambda student: (
+            student["percentage"],
+            student["total_marks"],
+            student["student_name"].lower()
+        ),
+        reverse=True
+    )
+
+    for rank, student in enumerate(students_data, start=1):
+        student["rank"] = rank
+
+    top_students = students_data[:3]
+
+    return render_template(
+        "leaderboard.html",
+        students=students_data,
+        top_students=top_students
+    )
+
+
+@app.route("/subject-analysis")
+def subject_analysis():
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                students.id AS student_id,
+                students.roll_no,
+                students.student_name,
+                marks.subject,
+                SUM(marks.marks) AS total_marks,
+                SUM(marks.max_marks) AS max_marks
+            FROM students
+            INNER JOIN marks
+                ON students.id = marks.student_id
+            GROUP BY
+                students.id,
+                students.roll_no,
+                students.student_name,
+                marks.subject
+            ORDER BY students.student_name, marks.subject
+        """)
+
+        results = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        db.close()
+
+    for row in results:
+        total = float(row["total_marks"] or 0)
+        maximum = float(row["max_marks"] or 0)
+
+        row["percentage"] = (
+            round((total / maximum) * 100, 2)
+            if maximum > 0 else 0
+        )
+
+        if maximum == 0:
+            row["status"] = "No marks"
+            row["suggestion"] = "Please check the marks data."
+        elif row["percentage"] < 50:
+            row["status"] = "Needs Improvement"
+            row["suggestion"] = (
+                "Practice regularly and focus on basic concepts."
+            )
+        elif row["percentage"] < 70:
+            row["status"] = "Average"
+            row["suggestion"] = (
+                "Revise regularly and practice more questions."
+            )
+        else:
+            row["status"] = "Good"
+            row["suggestion"] = (
+                "Keep up the good performance."
+            )
+
+    return render_template(
+        "subject_analysis.html",
+        results=results
+    )
+
+
+@app.route("/result-summary")
+def result_summary():
+    if "user_id" not in session:
+        return redirect("/")
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                students.id,
+                students.roll_no,
+                students.student_name,
+                COALESCE(SUM(marks.marks), 0) AS total_marks,
+                COALESCE(SUM(marks.max_marks), 0) AS max_marks
+            FROM students
+            LEFT JOIN marks
+                ON students.id = marks.student_id
+            GROUP BY
+                students.id,
+                students.roll_no,
+                students.student_name
+            ORDER BY students.student_name
+        """)
+
+        students_data = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        db.close()
+
+    for student in students_data:
+        total = float(student["total_marks"] or 0)
+        maximum = float(student["max_marks"] or 0)
+
+        student["percentage"] = (
+            round((total / maximum) * 100, 2)
+            if maximum > 0 else 0
+        )
+
+        percentage = student["percentage"]
+
+        if maximum == 0:
+            student["grade"] = "-"
+            student["result"] = "No Result"
+        elif percentage >= 90:
+            student["grade"] = "A+"
+            student["result"] = "Pass"
+        elif percentage >= 80:
+            student["grade"] = "A"
+            student["result"] = "Pass"
+        elif percentage >= 70:
+            student["grade"] = "B"
+            student["result"] = "Pass"
+        elif percentage >= 60:
+            student["grade"] = "C"
+            student["result"] = "Pass"
+        elif percentage >= 50:
+            student["grade"] = "D"
+            student["result"] = "Pass"
+        else:
+            student["grade"] = "F"
+            student["result"] = "Fail"
+
+    return render_template(
+        "result_summary.html",
+        students=students_data
+    )
+
 # =========================
 # RUN APPLICATION
 # =========================
@@ -4937,85 +6048,130 @@ from openpyxl.utils import get_column_letter
 # EDIT MARKS
 # =========================
 
+
 @app.route("/edit-marks/<int:id>", methods=["GET", "POST"])
 def edit_marks(id):
-
     if "user_id" not in session:
         return redirect("/")
 
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
-    if request.method == "POST":
+    try:
+        cursor.execute("""
+            SELECT id, subject, marks, max_marks,
+                   internal_marks, internal_max_marks,
+                   external_marks, external_max_marks
+            FROM marks
+            WHERE id = %s
+        """, (id,))
+        mark = cursor.fetchone()
 
-        subject = request.form["subject"]
-        marks = request.form["marks"]
-        max_marks = request.form["max_marks"]
-
-        try:
-            marks = float(marks)
-            max_marks = float(max_marks)
-
-            if max_marks <= 0:
-                return "Maximum marks must be greater than 0"
-
-            if marks < 0:
-                return "Marks cannot be negative"
-
-            if marks > max_marks:
-                return "Obtained marks cannot be greater than maximum marks"
-
-        except ValueError:
-            return "Please enter valid marks"
+        if not mark:
+            return "Marks record not found", 404
 
         cursor.execute("""
-            UPDATE marks
-            SET
-                subject = %s,
-                marks = %s,
-                max_marks = %s
-            WHERE id = %s
-        """, (
-            subject,
-            marks,
-            max_marks,
-            id
-        ))
+            SELECT subject_name, subject_code,
+                   internal_max_marks, external_max_marks
+            FROM subjects
+            ORDER BY subject_name
+        """)
+        subjects = cursor.fetchall()
 
-        db.commit()
+        if request.method == "POST":
+            subject = request.form.get("subject", "").strip()
 
+            try:
+                internal_marks = float(
+                    request.form.get("internal_marks", "")
+                )
+                external_marks = float(
+                    request.form.get("external_marks", "")
+                )
+            except (ValueError, TypeError):
+                return render_template(
+                    "edit_marks.html",
+                    mark=mark,
+                    subjects=subjects,
+                    error="Please enter valid numeric marks."
+                )
+
+            cursor.execute("""
+                SELECT subject_name, internal_max_marks, external_max_marks
+                FROM subjects
+                WHERE subject_name = %s
+            """, (subject,))
+            subject_data = cursor.fetchone()
+
+            error = None
+
+            if not subject_data:
+                error = "Please select a valid subject."
+            elif internal_marks < 0 or external_marks < 0:
+                error = "Marks cannot be negative."
+            elif internal_marks > float(subject_data["internal_max_marks"]):
+                error = (
+                    "Internal marks cannot exceed "
+                    f'{subject_data["internal_max_marks"]}.'
+                )
+            elif external_marks > float(subject_data["external_max_marks"]):
+                error = (
+                    "External marks cannot exceed "
+                    f'{subject_data["external_max_marks"]}.'
+                )
+
+            if error:
+                mark.update({
+                    "subject": subject,
+                    "internal_marks": internal_marks,
+                    "external_marks": external_marks
+                })
+
+                return render_template(
+                    "edit_marks.html",
+                    mark=mark,
+                    subjects=subjects,
+                    error=error
+                )
+
+            internal_max = float(subject_data["internal_max_marks"])
+            external_max = float(subject_data["external_max_marks"])
+            total_marks = internal_marks + external_marks
+            total_max = internal_max + external_max
+
+            cursor.execute("""
+                UPDATE marks
+                SET subject = %s,
+                    marks = %s,
+                    max_marks = %s,
+                    internal_marks = %s,
+                    internal_max_marks = %s,
+                    external_marks = %s,
+                    external_max_marks = %s
+                WHERE id = %s
+            """, (
+                subject,
+                total_marks,
+                total_max,
+                internal_marks,
+                internal_max,
+                external_marks,
+                external_max,
+                id
+            ))
+
+            db.commit()
+            return redirect("/marks")
+
+        return render_template(
+            "edit_marks.html",
+            mark=mark,
+            subjects=subjects
+        )
+
+    finally:
         cursor.close()
         db.close()
-
-        return redirect("/marks")
-
-    cursor.execute("""
-        SELECT
-            marks.id,
-            marks.subject,
-            marks.marks,
-            marks.max_marks,
-            students.student_name,
-            students.roll_no
-        FROM marks
-        JOIN students
-        ON students.id = marks.student_id
-        WHERE marks.id = %s
-    """, (id,))
-
-    mark = cursor.fetchone()
-
-    cursor.close()
-    db.close()
-
-    if not mark:
-        return "Marks record not found"
-
-    return render_template(
-        "edit_marks.html",
-        mark=mark
-    )
-    
     # =========================
 # DELETE MARKS
 # =========================
@@ -5423,6 +6579,8 @@ def overall_performance():
 
         participation_count=participation_count
     )
+    
+    print("RUNNING FILE:", __file__)
 
 # =========================
 # RUN APPLICATION 

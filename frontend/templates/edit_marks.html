@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Marks | Student Performance Analysis</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f3f6fc;
+            color: #1e293b;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #102a56, #2563eb);
+            color: white;
+            padding: 26px 20px;
+        }
+
+        .header-content {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .header h1 {
+            margin: 0 0 7px;
+            font-size: 27px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #dbeafe;
+            font-size: 14px;
+        }
+
+        .container {
+            width: calc(100% - 32px);
+            max-width: 680px;
+            margin: 32px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #e5eaf3;
+            box-shadow: 0 8px 28px rgba(15, 39, 78, 0.07);
+        }
+
+        .section-heading {
+            margin: 0 0 22px;
+            font-size: 20px;
+            color: #173b76;
+        }
+
+        .student-info {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 26px;
+        }
+
+        .info-grid, .marks-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .info-label {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #173b76;
+            font-size: 15px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .form-group { margin-bottom: 21px; }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        input, select {
+            width: 100%;
+            min-height: 46px;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 15px;
+            color: #1e293b;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .help-text {
+            margin: 7px 0 0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .total-box {
+            padding: 15px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 9px;
+            color: #166534;
+            font-weight: 600;
+            line-height: 1.8;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        button, .back-btn {
+            flex: 1;
+            min-height: 46px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+        }
+
+        button:hover { background: #1d4ed8; }
+
+        .back-btn {
+            background: #eaf0f8;
+            color: #334155;
+        }
+
+        .footer-note {
+            margin: 20px 0 0;
+            color: #64748b;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 520px) {
+            .header h1 { font-size: 22px; }
+            .container { margin: 20px auto; }
+            .card { padding: 21px 17px; }
+            .info-grid, .marks-grid { grid-template-columns: 1fr; gap: 10px; }
+            .buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+
+<body>
+<header class="header">
+    <div class="header-content">
+        <h1>✏️ Edit Student Marks</h1>
+        <p>Update internal and external marks in the Student Performance Analysis System.</p>
+    </div>
+</header>
+
+<main class="container">
+    <section class="card">
+
+        <h2 class="section-heading">Student Information</h2>
+
+        <div class="student-info">
+            <div class="info-grid">
+                <div>
+                    <span class="info-label">Student Name</span>
+                    <div class="info-value">{{ mark.student_name }}</div>
+                </div>
+
+                <div>
+                    <span class="info-label">Roll Number</span>
+                    <div class="info-value">{{ mark.roll_no }}</div>
+                </div>
+
+                <div>
+                    <span class="info-label">Subject</span>
+                    <div class="info-value">{{ mark.subject }}</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-heading">Update Marks Details</h2>
+
+        <form method="POST" id="editMarksForm">
+
+            <div class="marks-grid">
+                <div class="form-group">
+                    <label for="internal_marks">Internal Marks (Maximum 25)</label>
+                    <input
+                        type="number"
+                        id="internal_marks"
+                        name="internal_marks"
+                        value="{{ mark.internal_marks if mark.internal_marks is defined and mark.internal_marks is not none else 0 }}"
+                        min="0"
+                        max="{{ mark.internal_max_marks if mark.internal_max_marks is defined and mark.internal_max_marks is not none else 25 }}"
+                        step="0.01"
+                        required
+                    >
+                    <p class="help-text">
+                        Maximum: {{ mark.internal_max_marks if mark.internal_max_marks is defined and mark.internal_max_marks is not none else 25 }}
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label for="external_marks">External Marks (Maximum 75)</label>
+                    <input
+                        type="number"
+                        id="external_marks"
+                        name="external_marks"
+                        value="{{ mark.external_marks if mark.external_marks is defined and mark.external_marks is not none else 0 }}"
+                        min="0"
+                        max="{{ mark.external_max_marks if mark.external_max_marks is defined and mark.external_max_marks is not none else 75 }}"
+                        step="0.01"
+                        required
+                    >
+                    <p class="help-text">
+                        Maximum: {{ mark.external_max_marks if mark.external_max_marks is defined and mark.external_max_marks is not none else 75 }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="total-box">
+                Internal: <span id="internalDisplay">0</span>
+                /
+                <span id="internalMaxDisplay">25</span>
+                <br>
+                External: <span id="externalDisplay">0</span>
+                /
+                <span id="externalMaxDisplay">75</span>
+                <br>
+                Total: <span id="totalDisplay">0</span> /
+                <span id="totalMaxDisplay">100</span>
+            </div>
+
+            <div class="buttons">
+                <button type="submit">✓ Update Marks</button>
+                <a href="/marks" class="back-btn">Cancel</a>
+            </div>
+        </form>
+
+        <p class="footer-note">
+            Please verify both marks before saving your changes.
+        </p>
+
+    </section>
+</main>
+
+<script>
+    const form = document.getElementById("editMarksForm");
+    const internalInput = document.getElementById("internal_marks");
+    const externalInput = document.getElementById("external_marks");
+
+    const internalMax = Number(internalInput.max || 25);
+    const externalMax = Number(externalInput.max || 75);
+
+    document.getElementById("internalMaxDisplay").textContent = internalMax;
+    document.getElementById("externalMaxDisplay").textContent = externalMax;
+    document.getElementById("totalMaxDisplay").textContent =
+        internalMax + externalMax;
+
+    function updateTotal() {
+        const internal = Number(internalInput.value || 0);
+        const external = Number(externalInput.value || 0);
+
+        document.getElementById("internalDisplay").textContent = internal;
+        document.getElementById("externalDisplay").textContent = external;
+        document.getElementById("totalDisplay").textContent =
+            internal + external;
+
+        internalInput.setCustomValidity(
+            internal > internalMax
+                ? `Internal marks cannot exceed ${internalMax}.`
+                : ""
+        );
+
+        externalInput.setCustomValidity(
+            external > externalMax
+                ? `External marks cannot exceed ${externalMax}.`
+                : ""
+        );
+    }
+
+    internalInput.addEventListener("input", updateTotal);
+    externalInput.addEventListener("input", updateTotal);
+
+    form.addEventListener("submit", function(event) {
+        updateTotal();
+
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            form.reportValidity();
+        }
+    });
+
+    updateTotal();
+</script>
+</body>
+</html>

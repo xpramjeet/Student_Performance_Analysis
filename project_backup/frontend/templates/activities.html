@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Activity Records | Student Performance Analysis</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2447a8;
+            --primary-dark: #183477;
+            --background: #f3f6fc;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #142b63, #3159c7);
+            color: white;
+            padding: 22px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 18px rgba(20, 43, 99, 0.15);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(20px, 2.5vw, 27px);
+            line-height: 1.4;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+            color: #dbeafe;
+            font-size: 13px;
+        }
+
+        .dashboard-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            background: rgba(255, 255, 255, 0.13);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 9px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .dashboard-btn:hover {
+            background: rgba(255, 255, 255, 0.23);
+        }
+
+        .container {
+            max-width: 1600px;
+            width: 95%;
+            margin: 32px auto;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .page-heading h2 {
+            margin: 0;
+            color: var(--primary-dark);
+            font-size: 25px;
+        }
+
+        .page-heading p {
+            margin: 7px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .add-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #2447a8, #3866d6);
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .add-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .table-box {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 28px rgba(30, 64, 175, 0.06);
+        }
+
+        .table-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 17px;
+        }
+
+        .table-heading h3 {
+            margin: 0;
+            color: #203d83;
+            font-size: 17px;
+        }
+
+        .table-heading span {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e8edf5;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1100px;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead th {
+            padding: 15px 13px;
+            background: #eaf0ff;
+            color: #203d83;
+            text-align: left;
+            white-space: nowrap;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.35px;
+            border-bottom: 1px solid #d8e3ff;
+        }
+
+        tbody td {
+            padding: 14px 13px;
+            border-bottom: 1px solid #edf0f6;
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.6;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f8faff;
+        }
+
+        .id-badge {
+            display: inline-block;
+            min-width: 32px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            color: #475569;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .roll-badge {
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 6px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .student-name {
+            color: #1e293b;
+            font-weight: 700;
+            min-width: 130px;
+        }
+
+        .activity-name {
+            min-width: 140px;
+            color: #203d83;
+            font-weight: 600;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #eaf0ff;
+            color: #2447a8;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .excellent {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .very-good {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .good {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .average {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .needs-improvement {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .remarks {
+            min-width: 180px;
+            max-width: 300px;
+            overflow-wrap: anywhere;
+            color: #64748b;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 8px 11px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .edit-btn {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .edit-btn:hover {
+            background: #fde68a;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+
+        .empty {
+            padding: 45px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 36px;
+        }
+
+        .empty strong {
+            display: block;
+            margin-bottom: 7px;
+            color: #334155;
+            font-size: 16px;
+        }
+
+        .empty p {
+            margin: 0;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 20px 5%;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .container {
+                width: 94%;
+                margin: 24px auto;
+            }
+
+            .page-heading {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .page-heading h2 {
+                font-size: 22px;
+            }
+
+            .add-btn {
+                width: 100%;
+            }
+
+            .table-box {
+                padding: 12px;
+            }
+
+            .dashboard-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <div>
+            <h1>📊 Student Performance Analysis</h1>
+            <p>Admin Panel &nbsp; / &nbsp; Activity Management</p>
+        </div>
+
+        <a href="/dashboard" class="dashboard-btn">
+            🏠 Dashboard
+        </a>
+    </header>
+
+    <main class="container">
+
+        <div class="page-heading">
+            <div>
+                <h2>🎯 Activity Records</h2>
+                <p>View and manage students' academic and extracurricular activities.</p>
+            </div>
+
+            <a href="/add-activity" class="add-btn">
+                ➕ Add Activity
+            </a>
+        </div>
+
+        <section class="table-box">
+
+            <div class="table-heading">
+                <h3>All Activity Records</h3>
+                <span>Use the horizontal scroll to view all columns.</span>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Activity Name</th>
+                            <th>Activity Type</th>
+                            <th>Performance</th>
+                            <th>Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for record in activities %}
+                        <tr>
+                            <td>
+                                <span class="id-badge">{{ record.id }}</span>
+                            </td>
+
+                            <td>
+                                <span class="roll-badge">{{ record.roll_no }}</span>
+                            </td>
+
+                            <td>
+                                <div class="student-name">
+                                    {{ record.student_name }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="activity-name">
+                                    {{ record.activity_name }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="type-badge">
+                                    {{ record.activity_type }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% set performance_value = record.performance|default('', true)|lower|replace(' ', '-') %}
+
+                                <span class="performance-badge
+                                    {% if performance_value == 'excellent' %}excellent
+                                    {% elif performance_value == 'very-good' %}very-good
+                                    {% elif performance_value == 'good' %}good
+                                    {% elif performance_value == 'average' %}average
+                                    {% elif performance_value == 'needs-improvement' %}needs-improvement
+                                    {% endif %}">
+                                    {{ record.performance }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="remarks">
+                                    {{ record.remarks or '—' }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="actions">
+                                    <a
+                                        href="/edit-activity/{{ record.id }}"
+                                        class="action-btn edit-btn"
+                                    >
+                                        ✏️ Edit
+                                    </a>
+
+                                    <a
+                                        href="/delete-activity/{{ record.id }}"
+                                        class="action-btn delete-btn"
+                                        onclick="return confirm('Are you sure you want to delete this activity record?');"
+                                    >
+                                        🗑️ Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="empty">
+                                <span class="empty-icon">📭</span>
+                                <strong>No Activity Records Found</strong>
+                                <p>Add an activity to see its details here.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
+```
