@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: #222;
+        }
+
+        /* Header */
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 25px;
+        }
+
+        .student-info {
+            font-size: 14px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .logout {
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .logout:hover {
+            background: #b02a37;
+        }
+
+        /* Main */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 35px auto;
+        }
+
+        .welcome {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .welcome h2 {
+            color: #243f87;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #666;
+        }
+
+        /* Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h3 {
+            color: #243f87;
+            margin-bottom: 10px;
+            font-size: 19px;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .card a {
+            display: inline-block;
+            background: #243f87;
+            color: white;
+            text-decoration: none;
+            padding: 9px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .card a:hover {
+            background: #1b316b;
+        }
+
+        /* Message unread */
+        .unread {
+            color: #dc3545 !important;
+            font-weight: bold;
+            margin-bottom: 12px !important;
+        }
+
+        .no-unread {
+            color: #198754 !important;
+            font-weight: bold;
+            margin-bottom: 12px !important;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #777;
+            font-size: 13px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 18px;
+            }
+
+            .container {
+                width: 94%;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class="header">
+
+        <div>
+            <h1>🎓 Student Dashboard</h1>
+
+            <div class="student-info">
+                Student: {{ student_name }}
+                &nbsp; | &nbsp;
+                Roll No: {{ student_roll_no }}
+            </div>
+        </div>
+
+        <a href="/student-logout" class="logout">
+            Logout
+        </a>
+
+    </div>
+
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Welcome -->
+        <div class="welcome">
+
+            <h2>
+                Welcome, {{ student_name }} 👋
+            </h2>
+
+            <p>
+                Manage and view your academic performance, attendance,
+                practicals, assignments and other student information.
+            </p>
+
+        </div>
+
+
+        <!-- Dashboard Cards -->
+        <div class="grid">
+
+            <!-- Profile -->
+            <div class="card">
+
+                <h3>👤 Profile</h3>
+
+                <p>
+                    View your personal and academic profile information.
+                </p>
+
+                <a href="/student-profile">
+                    View Profile
+                </a>
+
+            </div>
+
+
+            <!-- Marks -->
+            <div class="card">
+
+                <h3>📚 Theory Marks</h3>
+
+                <p>
+                    View your subject-wise theory marks and performance.
+                </p>
+
+                <a href="/student-marks">
+                    View Marks
+                </a>
+
+            </div>
+
+
+            <!-- Practical -->
+            <div class="card">
+
+                <h3>🧪 Practical</h3>
+
+                <p>
+                    View your practical subject marks and performance.
+                </p>
+
+                <a href="/student-practical">
+                    View Practical
+                </a>
+
+            </div>
+
+
+            <!-- Assignments -->
+            <div class="card">
+
+                <h3>📝 Assignments</h3>
+
+                <p>
+                    View your assignments and submission status.
+                </p>
+
+                <a href="/student-assignments">
+                    View Assignments
+                </a>
+
+            </div>
+
+
+            <!-- Attendance -->
+            <div class="card">
+
+                <h3>📅 Attendance</h3>
+
+                <p>
+                    Check your subject-wise attendance percentage.
+                </p>
+
+                <a href="/student-attendance">
+                    View Attendance
+                </a>
+
+            </div>
+
+
+            <!-- Activities -->
+            <div class="card">
+
+                <h3>🎯 Activities</h3>
+
+                <p>
+                    View your academic and extracurricular activities.
+                </p>
+
+                <a href="/student-activities">
+                    View Activities
+                </a>
+
+            </div>
+
+
+            <!-- Participation -->
+            <div class="card">
+
+                <h3>🏆 Participation</h3>
+
+                <p>
+                    View your event participation and achievements.
+                </p>
+
+                <a href="/student-participation">
+                    View Participation
+                </a>
+
+            </div>
+
+
+            <!-- Overall Performance -->
+            <div class="card">
+
+                <h3>📊 Overall Performance</h3>
+
+                <p>
+                    View your overall academic performance and grade.
+                </p>
+
+                <a href="/student-overall-performance">
+                    View Performance
+                </a>
+
+            </div>
+
+
+            <!-- Report -->
+            <div class="card">
+
+                <h3>📄 Student Report</h3>
+
+                <p>
+                    View your complete academic report and download PDF.
+                </p>
+
+                <a href="/student-report">
+                    View Report
+                </a>
+
+            </div>
+
+            <div class="card">
+                
+                <h3>🏆 Certificates</h3>
+                
+                <p>
+                    View and download your certificates.
+                </p>
+                <a href="/student-certificates">
+                    View Certificates
+                </a>
+            </div>
+
+
+            <!-- Messages -->
+            <div class="card">
+
+                <h3>📩 Messages</h3>
+
+                <p>
+                    View messages and notices sent by admin.
+                </p>
+
+                {% if unread_count > 0 %}
+
+                    <p class="unread">
+                        🔴 {{ unread_count }}
+                        Unread Message{% if unread_count > 1 %}s{% endif %}
+                    </p>
+
+                {% else %}
+
+                    <p class="no-unread">
+                        ✅ No Unread Messages
+                    </p>
+
+                {% endif %}
+
+                <a href="/student-messages">
+                    View Messages
+                </a>
+
+            </div>
+
+
+            <!-- Change Password -->
+            <div class="card">
+
+                <h3>🔐 Change Password</h3>
+
+                <p>
+                    Change your student account password securely.
+                </p>
+
+                <a href="/student-change-password">
+                    Change Password
+                </a>
+
+            </div>
+
+
+            <!-- Account -->
+            <div class="card">
+
+                <h3>⚙️ Account</h3>
+
+                <p>
+                    Manage your student account information.
+                </p>
+
+                <a href="/student-profile">
+                    Account Details
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer -->
+    <div class="footer">
+
+        © 2026 Student Performance Analysis and Management System
+
+    </div>
+
+</body>
+
+</html>

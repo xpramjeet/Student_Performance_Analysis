@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participation Records | Student Performance Analysis</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f3f6fc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #142b5c, #2855a6);
+            color: white;
+            padding: 24px 6%;
+            box-shadow: 0 4px 18px rgba(20, 43, 92, 0.16);
+        }
+
+        .brand {
+            font-size: clamp(21px, 3vw, 30px);
+            font-weight: 750;
+            line-height: 1.4;
+        }
+
+        .subtitle {
+            margin-top: 7px;
+            color: #dbeafe;
+            font-size: 14px;
+        }
+
+        .container {
+            width: min(1250px, 92%);
+            margin: 40px auto;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .page-heading h2 {
+            color: #18366f;
+            font-size: clamp(24px, 3vw, 31px);
+            margin-bottom: 7px;
+        }
+
+        .page-heading p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .add-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            background: #1767d2;
+            color: white;
+            padding: 13px 19px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 650;
+            font-size: 14px;
+            box-shadow: 0 5px 13px rgba(23, 103, 210, 0.2);
+            transition: 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #1054b4;
+            transform: translateY(-2px);
+        }
+
+        .table-box {
+            background: white;
+            border: 1px solid #e5eaf3;
+            padding: 22px;
+            border-radius: 16px;
+            box-shadow: 0 8px 28px rgba(31, 55, 100, 0.06);
+        }
+
+        .table-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .table-heading h3 {
+            color: #1e3a70;
+            font-size: 18px;
+        }
+
+        .table-label {
+            background: #eef4ff;
+            color: #2855a6;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e8edf5;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1050px;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1c3975;
+            color: white;
+        }
+
+        th {
+            padding: 15px 13px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.35px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 15px 13px;
+            border-bottom: 1px solid #edf0f6;
+            font-size: 13px;
+            color: #475569;
+            vertical-align: middle;
+            line-height: 1.6;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f7faff;
+        }
+
+        .roll-badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 6px;
+            background: #eef4ff;
+            color: #2454a6;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .student-name {
+            color: #1e293b;
+            font-weight: 650;
+            min-width: 135px;
+        }
+
+        .event-name {
+            color: #263f72;
+            font-weight: 650;
+            min-width: 130px;
+        }
+
+        .type-badge,
+        .level-badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 650;
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .level-badge {
+            background: #eaf2ff;
+            color: #2454a6;
+        }
+
+        .achievement {
+            color: #087443;
+            font-weight: 650;
+            min-width: 100px;
+        }
+
+        .remarks {
+            min-width: 140px;
+            max-width: 230px;
+            overflow-wrap: anywhere;
+        }
+
+        .action-cell {
+            white-space: nowrap;
+            min-width: 155px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 11px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 650;
+            transition: 0.2s ease;
+            margin: 2px;
+        }
+
+        .edit-btn {
+            background: #eaf2ff;
+            color: #1858b5;
+            border: 1px solid #d6e5ff;
+        }
+
+        .edit-btn:hover {
+            background: #d7e7ff;
+        }
+
+        .delete-btn {
+            background: #fff0f0;
+            color: #c62828;
+            border: 1px solid #ffdddd;
+        }
+
+        .delete-btn:hover {
+            background: #ffe0e0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 38px 20px !important;
+            color: #64748b;
+            line-height: 1.8;
+        }
+
+        .back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            color: #2454a6;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            color: #142b5c;
+            text-decoration: underline;
+        }
+
+        a:focus-visible {
+            outline: 3px solid #93c5fd;
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 650px) {
+            .header {
+                padding: 20px 5%;
+            }
+
+            .container {
+                width: 94%;
+                margin: 28px auto;
+            }
+
+            .top {
+                align-items: stretch;
+            }
+
+            .add-btn {
+                width: 100%;
+            }
+
+            .table-box {
+                padding: 13px;
+                border-radius: 12px;
+            }
+
+            .table-heading {
+                align-items: flex-start;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .header {
+                background: #1c3975;
+                box-shadow: none;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .add-btn,
+            .action-cell,
+            .back {
+                display: none;
+            }
+
+            .container {
+                width: 100%;
+                margin: 20px auto;
+            }
+
+            .table-box {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+
+            .table-responsive {
+                overflow: visible;
+            }
+
+            table {
+                min-width: 0;
+            }
+
+            th,
+            td {
+                padding: 8px 6px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="brand">Student Performance Analysis</div>
+        <div class="subtitle">
+            Student Performance Analysis and Management System
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="top">
+            <div class="page-heading">
+                <h2>Participation Records</h2>
+                <p>
+                    Manage student participation, events, achievements and extracurricular activities.
+                </p>
+            </div>
+
+            <a href="/add-participation" class="add-btn">
+                <span aria-hidden="true">＋</span>
+                Add Participation
+            </a>
+        </section>
+
+        <section class="table-box">
+
+            <div class="table-heading">
+                <h3>All Participation Records</h3>
+                <span class="table-label">Student Activities</span>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Event</th>
+                            <th>Event Type</th>
+                            <th>Level</th>
+                            <th>Achievement</th>
+                            <th>Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for record in participation %}
+                        <tr>
+                            <td>
+                                <span class="roll-badge">{{ record.roll_no }}</span>
+                            </td>
+
+                            <td class="student-name">
+                                {{ record.student_name }}
+                            </td>
+
+                            <td class="event-name">
+                                {{ record.event_name }}
+                            </td>
+
+                            <td>
+                                <span class="type-badge">
+                                    {{ record.event_type }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="level-badge">
+                                    {{ record.participation_level }}
+                                </span>
+                            </td>
+
+                            <td class="achievement">
+                                {{ record.achievement }}
+                            </td>
+
+                            <td class="remarks">
+                                {{ record.remarks }}
+                            </td>
+
+                            <td class="action-cell">
+                                <a
+                                    href="/edit-participation/{{ record.id }}"
+                                    class="edit-btn">
+                                    Edit
+                                </a>
+
+                                <a
+                                    href="/delete-participation/{{ record.id }}"
+                                    class="delete-btn"
+                                    onclick="return confirm('Are you sure you want to delete this participation record?');">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                <strong>No participation records found.</strong>
+                                <br>
+                                Add a participation record to see it listed here.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+        <a href="/dashboard" class="back">
+            <span aria-hidden="true">←</span>
+            Back to Dashboard
+        </a>
+
+    </main>
+
+</body>
+</html>
+```

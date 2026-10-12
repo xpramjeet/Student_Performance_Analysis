@@ -1,6 +1,7 @@
-__pycache__/
-*.pyc
-.env
-.venv/
-venv/
-.vscode/
+@"
+
+# Local backup files
+*_before_git_check.py
+*_before_git_check.html
+project_backup/
+"@ | Add-Content .gitignore

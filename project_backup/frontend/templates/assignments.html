@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Assignment Records | Student Performance</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        :root {
+            --primary: #243f87;
+            --primary-dark: #172d65;
+            --background: #f3f6fc;
+            --text: #26334d;
+            --muted: #718096;
+            --border: #e5eaf4;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        .header {
+            background: linear-gradient(120deg, #172d65, #3158ae);
+            color: white;
+            padding: 22px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 5px 20px rgba(23, 45, 101, 0.18);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 7px;
+        }
+
+        .header p {
+            color: #dce6ff;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .header a {
+            background: white;
+            color: var(--primary);
+            padding: 11px 17px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .header a:hover {
+            background: #eaf0ff;
+            transform: translateY(-1px);
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1500px;
+            margin: 30px auto;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .top-section h2 {
+            color: var(--primary);
+            font-size: 25px;
+            margin-bottom: 7px;
+        }
+
+        .top-section p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .add-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            background: linear-gradient(120deg, #243f87, #3158ae);
+            color: white;
+            text-decoration: none;
+            padding: 12px 18px;
+            border-radius: 9px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(36, 63, 135, 0.15);
+            transition: 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 16px rgba(36, 63, 135, 0.2);
+        }
+
+        .table-box {
+            background: white;
+            padding: 22px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            box-shadow: 0 5px 22px rgba(30, 55, 100, 0.055);
+            overflow-x: auto;
+        }
+
+        .table-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .table-heading h3 {
+            color: var(--primary);
+            font-size: 17px;
+        }
+
+        .table-heading span {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1100px;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        thead th {
+            background: #edf2ff;
+            color: var(--primary);
+            padding: 14px 12px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid #dce5fb;
+            white-space: nowrap;
+        }
+
+        thead th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        thead th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        tbody td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #edf0f6;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f8faff;
+        }
+
+        .roll {
+            color: var(--primary);
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .student-name {
+            color: #34415c;
+            font-weight: bold;
+            min-width: 130px;
+        }
+
+        .assignment-title {
+            font-weight: bold;
+            color: #34415c;
+            min-width: 140px;
+        }
+
+        .marks {
+            font-weight: bold;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            background: #edf2ff;
+            color: var(--primary);
+        }
+
+        .status.submitted {
+            background: #e7f7ed;
+            color: #17663a;
+        }
+
+        .status.pending {
+            background: #fff4d6;
+            color: #8a5a00;
+        }
+
+        .status.late {
+            background: #fff0f0;
+            color: #b42332;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            display: inline-block;
+            padding: 8px 11px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+
+        .edit-btn {
+            background: #fff4d6;
+            color: #8a5a00;
+            border: 1px solid #ffe4a1;
+        }
+
+        .edit-btn:hover {
+            background: #ffe9ad;
+        }
+
+        .delete-btn {
+            background: #fff0f0;
+            color: #b42332;
+            border: 1px solid #f5d0d3;
+        }
+
+        .delete-btn:hover {
+            background: #ffdddd;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px 15px !important;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            padding: 22px 15px;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 650px) {
+            .header {
+                padding: 20px 5%;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .header a,
+            .add-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .container {
+                margin: 23px auto;
+            }
+
+            .top-section h2 {
+                font-size: 22px;
+            }
+
+            .table-box {
+                padding: 14px;
+            }
+
+            .table-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+    <div>
+        <h1>🎓 Student Performance Analysis</h1>
+        <p>Admin Panel / Assignment Management</p>
+    </div>
+
+    <a href="/dashboard">🏠 Back to Dashboard</a>
+</header>
+
+<main class="container">
+
+    <section class="top-section">
+        <div>
+            <h2>📝 Assignment Records</h2>
+            <p>Manage student assignments, marks and submission status.</p>
+        </div>
+
+        <a href="/add-assignment" class="add-btn">
+            ➕ Add Assignment
+        </a>
+    </section>
+
+    <section class="table-box">
+
+        <div class="table-heading">
+            <h3>All Assignment Records</h3>
+            <span>Assignment management table</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Title</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Maximum Marks</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for record in assignments %}
+                <tr>
+                    <td>{{ record.id }}</td>
+
+                    <td class="roll">
+                        {{ record.roll_no }}
+                    </td>
+
+                    <td class="student-name">
+                        {{ record.student_name }}
+                    </td>
+
+                    <td class="assignment-title">
+                        {{ record.title }}
+                    </td>
+
+                    <td>{{ record.subject }}</td>
+
+                    <td class="marks">
+                        {{ record.marks }}
+                    </td>
+
+                    <td>{{ record.max_marks }}</td>
+
+                    <td>
+                        <span class="status {% if record.submission_status|lower == 'submitted' %}submitted{% elif record.submission_status|lower == 'pending' %}pending{% elif record.submission_status|lower == 'late' %}late{% endif %}">
+                            {{ record.submission_status }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="actions">
+                            <a
+                                href="/edit-assignment/{{ record.id }}"
+                                class="edit-btn">
+                                ✏️ Edit
+                            </a>
+
+                            <a
+                                href="/delete-assignment/{{ record.id }}"
+                                class="delete-btn"
+                                onclick="return confirm('Are you sure you want to delete this assignment record?');">
+                                🗑️ Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="9" class="empty">
+                        <div style="font-size: 30px; margin-bottom: 10px;">📝</div>
+                        <strong>No assignment records found.</strong>
+                        <br>
+                        Use “Add Assignment” to create the first record.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </section>
+
+</main>
+
+<footer class="footer">
+    © 2026 Student Performance Analysis & Management System
+    <br>
+    Assignment Management Module
+</footer>
+
+</body>
+</html>
+```

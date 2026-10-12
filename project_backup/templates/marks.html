@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Marks Management</title>
+
+    <style>
+        .delete-btn {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 8px 14px;
+    background: #dc3545;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.delete-btn:hover {
+    background: #b02a37;
+}
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            background: #243f8f;
+            color: white;
+            padding: 24px 22px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 34px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            font-size: 18px;
+        }
+
+        /* =========================
+           MAIN CONTAINER
+        ========================= */
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+        }
+
+        /* =========================
+           TOP SECTION
+        ========================= */
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .top-section h2 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 13px 20px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .dashboard-btn {
+            background: #666;
+            color: white;
+        }
+
+        .add-btn {
+            background: #243f8f;
+            color: white;
+        }
+
+        .dashboard-btn:hover {
+            background: #555;
+        }
+
+        .add-btn:hover {
+            background: #1b3275;
+        }
+
+        /* =========================
+           TABLE CARD
+        ========================= */
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        /* =========================
+           TABLE HEADER
+        ========================= */
+
+        th {
+            background: #243f8f;
+            color: white;
+            padding: 18px 15px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* =========================
+           TABLE DATA
+        ========================= */
+
+        td {
+            padding: 16px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+            font-size: 16px;
+        }
+
+        tr:hover {
+            background: #f8f9fc;
+        }
+
+        .marks {
+            font-weight: bold;
+            color: #243f8f;
+        }
+
+        /* =========================
+           EDIT BUTTON
+        ========================= */
+
+        .edit-btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #243f8f;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .edit-btn:hover {
+            background: #1b3275;
+        }
+
+        /* =========================
+           EMPTY MESSAGE
+        ========================= */
+
+        .empty {
+            padding: 30px;
+            text-align: center;
+            color: #777;
+            font-size: 17px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 768px) {
+
+            .header h1 {
+                font-size: 25px;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .top-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .top-section h2 {
+                font-size: 26px;
+            }
+
+            .buttons {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     HEADER
+========================= -->
+
+<div class="header">
+
+    <h1>
+        Student Performance Analysis and Management System
+    </h1>
+
+    <p>
+        Marks Management
+    </p>
+
+</div>
+
+
+<!-- =========================
+     MAIN
+========================= -->
+
+<div class="container">
+
+
+    <!-- TOP SECTION -->
+
+    <div class="top-section">
+
+        <h2>
+            Student Marks Records
+        </h2>
+
+
+        <div class="buttons">
+
+            <a href="/dashboard"
+               class="btn dashboard-btn">
+
+                ← Dashboard
+
+            </a>
+
+
+            <a href="/add-marks"
+               class="btn add-btn">
+
+                + Add Marks
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         TABLE
+    ========================= -->
+
+    <div class="table-card">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Roll No</th>
+
+                    <th>Student Name</th>
+
+                    <th>Subject</th>
+
+                    <th>Marks</th>
+
+                    <th>Maximum Marks</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for mark in marks %}
+
+                <tr>
+
+                    <td>
+                        {{ mark.id }}
+                    </td>
+
+
+                    <td>
+                        {{ mark.roll_no }}
+                    </td>
+
+
+                    <td>
+                        {{ mark.student_name }}
+                    </td>
+
+
+                    <td>
+                        {{ mark.subject }}
+                    </td>
+
+
+                    <td class="marks">
+                        {{ mark.marks }}
+                    </td>
+
+
+                    <td>
+                        {{ mark.max_marks }}
+                    </td>
+
+
+                    <td>
+
+                        <a href="/edit-marks/{{ mark.id }}"
+                           class="edit-btn">
+
+                            ✏️ Edit
+
+                        </a>
+                        <a href="/delete-marks/{{ mark.id }}"
+                        class="delete-btn"
+                        onclick="return confirm('Are you sure you want to delete these marks?');">
+                        🗑️ Delete
+                    </a>
+
+                    </td>
+
+                </tr>
+
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="7"
+                        class="empty">
+
+                        No marks records found.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+</body>
+
+</html>

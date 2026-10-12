@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Practical</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+        }
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1f3c88;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d6dbe5;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 25px;
+            width: 100%;
+            padding: 13px;
+            background: #1f3c88;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #17306f;
+        }
+
+        .back {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: #1f3c88;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>
+            Student Performance Analysis and Management System
+        </h1>
+
+    </div>
+
+    <div class="container">
+
+        <h2>
+            Add Practical Record
+        </h2>
+
+        <form method="POST">
+
+            <label>
+                Select Student
+            </label>
+
+            <select name="student_id" required>
+
+                <option value="">
+                    -- Select Student --
+                </option>
+
+                {% for student in students %}
+
+                    <option value="{{ student.id }}">
+
+                        {{ student.roll_no }}
+                        -
+                        {{ student.student_name }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <label>
+                Subject
+            </label>
+
+            <input
+                type="text"
+                name="subject"
+                placeholder="Enter practical subject"
+                required
+            >
+
+
+            <label>
+                Obtained Marks
+            </label>
+
+            <input
+                type="number"
+                name="marks"
+                min="0"
+                step="0.01"
+                placeholder="Enter obtained marks"
+                required
+            >
+
+
+            <label>
+                Maximum Marks
+            </label>
+
+            <input
+                type="number"
+                name="max_marks"
+                min="1"
+                step="0.01"
+                value="100"
+                required
+            >
+
+
+            <button type="submit">
+                Save Practical Record
+            </button>
+
+        </form>
+
+        <a href="/practical" class="back">
+            ← View Practical Records
+        </a>
+
+        <a href="/dashboard" class="back">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</body>
+
+</html>

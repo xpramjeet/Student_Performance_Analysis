@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Student Attendance | Student Performance Analysis</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2447a8;
+            --primary-dark: #183477;
+            --background: #f3f6fc;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #dbe3f0;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #142b63, #3159c7);
+            color: white;
+            padding: 25px 5%;
+            box-shadow: 0 4px 18px rgba(20, 43, 99, 0.15);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(21px, 3vw, 28px);
+            line-height: 1.4;
+        }
+
+        .header p {
+            margin: 7px 0 0;
+            color: #dbeafe;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .page-heading {
+            margin-bottom: 22px;
+        }
+
+        .page-heading h2 {
+            margin: 0;
+            color: var(--primary-dark);
+            font-size: 25px;
+        }
+
+        .page-heading p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 8px 0 0;
+        }
+
+        .form-box {
+            background: white;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 8px 28px rgba(30, 64, 175, 0.07);
+        }
+
+        .form-heading {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #e9edf5;
+        }
+
+        .heading-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: #eaf0ff;
+            font-size: 23px;
+        }
+
+        .form-heading h3 {
+            margin: 0;
+            color: #203d83;
+            font-size: 19px;
+        }
+
+        .form-heading p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .error-message {
+            background: #fff1f2;
+            color: #b42332;
+            border: 1px solid #fecdd3;
+            padding: 13px 15px;
+            margin-bottom: 22px;
+            border-radius: 9px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 21px;
+        }
+
+        .form-group {
+            min-width: 0;
+            margin-bottom: 2px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        input,
+        select {
+            display: block;
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: white;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #4775df;
+            box-shadow: 0 0 0 3px rgba(71, 117, 223, 0.13);
+        }
+
+        .help-text {
+            display: block;
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .info-note {
+            margin-top: 24px;
+            padding: 13px 15px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 9px;
+            color: #1e40af;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 27px;
+            padding-top: 22px;
+            border-top: 1px solid #e9edf5;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 11px 17px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #2447a8, #3866d6);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .attendance-btn {
+            background: #eaf0ff;
+            color: #2447a8;
+            border-color: #d4e0ff;
+        }
+
+        .attendance-btn:hover {
+            background: #dce7ff;
+        }
+
+        .students-btn {
+            background: #f1f5f9;
+            color: #334155;
+            border-color: #dbe3ed;
+        }
+
+        .students-btn:hover {
+            background: #e2e8f0;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 22px 5%;
+            }
+
+            .container {
+                margin: 24px auto;
+                padding: 0 14px;
+            }
+
+            .form-box {
+                padding: 21px 17px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .page-heading h2 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <h1>Student Performance Analysis and Management System</h1>
+        <p>Admin Panel &nbsp; / &nbsp; Attendance Management</p>
+    </header>
+
+    <main class="container">
+
+        <div class="page-heading">
+            <h2>📅 Add Student Attendance</h2>
+            <p>Record a student's attendance for a specific subject.</p>
+        </div>
+
+        <section class="form-box">
+
+            <div class="form-heading">
+                <div class="heading-icon">📋</div>
+                <div>
+                    <h3>Attendance Information</h3>
+                    <p>Complete all required fields below.</p>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="error-message" role="alert">
+                ❌ {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" id="attendanceForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group full-width">
+                        <label for="student_id">
+                            Select Student <span class="required">*</span>
+                        </label>
+
+                        <select name="student_id" id="student_id" required>
+                            <option value="">-- Select Student --</option>
+
+                            {% for student in students %}
+                            <option value="{{ student.id }}">
+                                {{ student.roll_no }} - {{ student.student_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+
+                        <span class="help-text">
+                            Choose the student whose attendance you want to record.
+                        </span>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="subject">
+                            Subject <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="subject"
+                            id="subject"
+                            placeholder="e.g. Database Management System"
+                            maxlength="150"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total_classes">
+                            Total Classes <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="number"
+                            name="total_classes"
+                            id="total_classes"
+                            min="1"
+                            step="1"
+                            placeholder="Enter total classes"
+                            required
+                        >
+
+                        <span class="help-text">
+                            Total classes conducted for this subject.
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="attended_classes">
+                            Attended Classes <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="number"
+                            name="attended_classes"
+                            id="attended_classes"
+                            min="0"
+                            step="1"
+                            placeholder="Enter attended classes"
+                            required
+                        >
+
+                        <span class="help-text">
+                            Must not exceed the total classes.
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="info-note">
+                    💡 <strong>Note:</strong> Check the total and attended classes
+                    carefully before saving. Attendance percentage is based on
+                    these two values.
+                </div>
+
+                <div class="buttons">
+                    <button type="submit" class="btn save-btn">
+                        💾 Save Attendance
+                    </button>
+
+                    <a href="/attendance" class="btn attendance-btn">
+                        📊 View Attendance
+                    </a>
+
+                    <a href="/students" class="btn students-btn">
+                        ← Back to Students
+                    </a>
+                </div>
+
+            </form>
+
+        </section>
+    </main>
+
+    <script>
+        const attendanceForm = document.getElementById("attendanceForm");
+        const totalInput = document.getElementById("total_classes");
+        const attendedInput = document.getElementById("attended_classes");
+
+        function validateAttendance() {
+            const total = Number(totalInput.value);
+            const attended = Number(attendedInput.value);
+
+            attendedInput.setCustomValidity("");
+
+            if (
+                totalInput.value !== "" &&
+                attendedInput.value !== "" &&
+                (total < 1 || attended < 0 || attended > total)
+            ) {
+                attendedInput.setCustomValidity(
+                    "Attended classes must be between 0 and total classes."
+                );
+                return false;
+            }
+
+            return true;
+        }
+
+        totalInput.addEventListener("input", validateAttendance);
+        attendedInput.addEventListener("input", validateAttendance);
+
+        attendanceForm.addEventListener("submit", function (event) {
+            if (!validateAttendance()) {
+                event.preventDefault();
+                attendedInput.reportValidity();
+            }
+        });
+    </script>
+
+</body>
+</html>
+```

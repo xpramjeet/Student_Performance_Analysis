@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Certificates</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .back {
+            background: white;
+            color: #243f87;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1100px;
+            margin: 35px auto;
+        }
+
+        .intro {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .intro h2 {
+            margin: 0 0 8px;
+            color: #243f87;
+        }
+
+        .intro p {
+            color: #666;
+        }
+
+        .certificate-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .certificate {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .certificate h3 {
+            color: #243f87;
+            margin-top: 0;
+        }
+
+        .certificate p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .download {
+            display: block;
+            text-align: center;
+            background: #243f87;
+            color: white;
+            padding: 11px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 18px;
+        }
+
+        .download:hover {
+            background: #1b316b;
+        }
+
+        .empty {
+            background: white;
+            padding: 45px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .empty h2 {
+            color: #243f87;
+        }
+
+        footer {
+            background: #243f87;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 900px) {
+
+            .certificate-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .certificate-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>🎓 My Certificates</h1>
+
+        <a href="/student-dashboard" class="back">
+            ← Dashboard
+        </a>
+
+    </div>
+
+
+    <div class="container">
+
+        <div class="intro">
+
+            <h2>📜 Certificates</h2>
+
+            <p>
+                View and download certificates uploaded
+                by the administrator.
+            </p>
+
+        </div>
+
+
+        {% if certificates %}
+
+            <div class="certificate-grid">
+
+                {% for certificate in certificates %}
+
+                    <div class="certificate">
+
+                        <h3>
+                            📜 {{ certificate.certificate_title }}
+                        </h3>
+
+                        <p>
+                            <strong>File:</strong>
+                            {{ certificate.file_name }}
+                        </p>
+
+                        <p>
+                            <strong>Uploaded:</strong>
+                            {{ certificate.uploaded_at }}
+                        </p>
+
+                        <a
+                            href="/student-certificate-download/{{ certificate.id }}"
+                            class="download"
+                        >
+                            ⬇ Download PDF
+                        </a>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty">
+
+                <h2>📭 No Certificates</h2>
+
+                <p>
+                    No certificates have been uploaded
+                    for your account yet.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <footer>
+        Student Performance Analysis & Management System
+    </footer>
+
+</body>
+
+</html>

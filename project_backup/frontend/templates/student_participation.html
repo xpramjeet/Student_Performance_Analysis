@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Participation | SPAMS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: linear-gradient(120deg, #0f172a, #1e3a8a, #2563eb);
+            color: white;
+            padding: 24px 6%;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-icon {
+            width: 49px;
+            height: 49px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.15);
+            font-size: 25px;
+            flex-shrink: 0;
+        }
+
+        .brand h1 {
+            font-size: 21px;
+            line-height: 1.4;
+        }
+
+        .brand p {
+            margin-top: 5px;
+            color: #cbd5e1;
+            font-size: 12px;
+        }
+
+        .container {
+            width: 94%;
+            max-width: 1450px;
+            margin: 35px auto 50px;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .page-heading h2 {
+            color: #0f172a;
+            font-size: 27px;
+        }
+
+        .page-heading p {
+            margin-top: 7px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .page-badge {
+            display: inline-block;
+            padding: 9px 13px;
+            border-radius: 20px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .table-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(15,23,42,0.045);
+        }
+
+        .table-heading {
+            padding: 22px 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table-heading h3 {
+            font-size: 17px;
+            color: #1e3a8a;
+        }
+
+        .table-heading p {
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #1e3a8a;
+            color: white;
+            padding: 16px 18px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 17px 18px;
+            border-bottom: 1px solid #edf2f7;
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tbody tr:hover {
+            background: #eff6ff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .event-name {
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .event-type {
+            display: inline-block;
+            padding: 6px 9px;
+            border-radius: 7px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .level {
+            display: inline-block;
+            padding: 6px 9px;
+            border-radius: 7px;
+            background: #f3e8ff;
+            color: #7e22ce;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .achievement {
+            color: #166534;
+            font-weight: 600;
+        }
+
+        .no-record {
+            text-align: center;
+            padding: 42px 20px;
+            color: #64748b;
+            line-height: 1.8;
+        }
+
+        .empty-icon {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 30px;
+        }
+
+        .no-record strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #334155;
+        }
+
+        .bottom-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .bottom-note {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 19px;
+            border-radius: 9px;
+            background: linear-gradient(90deg, #1d4ed8, #2563eb);
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.18);
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 7px 16px rgba(37,99,235,0.25);
+        }
+
+        .footer {
+            padding: 22px 15px;
+            text-align: center;
+            color: #64748b;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .topbar {
+                padding: 20px 5%;
+            }
+
+            .brand h1 {
+                font-size: 17px;
+            }
+
+            .container {
+                width: 94%;
+                margin-top: 25px;
+            }
+
+            .page-heading h2 {
+                font-size: 23px;
+            }
+
+            .table-heading {
+                padding: 19px;
+            }
+
+            .bottom-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .back-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-icon">🎓</div>
+            <div>
+                <h1>Student Performance System</h1>
+                <p>Academic Management Portal</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <div class="page-heading">
+            <div>
+                <h2>🏆 My Participation</h2>
+                <p>View your events, participation levels and achievements.</p>
+            </div>
+
+            <span class="page-badge">ACTIVITIES &amp; EVENTS</span>
+        </div>
+
+        <section class="table-card">
+
+            <div class="table-heading">
+                <h3>📋 Participation Records</h3>
+                <p>Your recorded extracurricular activities and event participation.</p>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Event Type</th>
+                            <th>Participation Level</th>
+                            <th>Achievement</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for record in participation %}
+                            <tr>
+                                <td class="event-name">
+                                    {{ record.event_name or '—' }}
+                                </td>
+
+                                <td>
+                                    <span class="event-type">
+                                        {{ record.event_type or '—' }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="level">
+                                        {{ record.participation_level or '—' }}
+                                    </span>
+                                </td>
+
+                                <td class="achievement">
+                                    {{ record.achievement or '—' }}
+                                </td>
+
+                                <td>
+                                    {{ record.remarks or '—' }}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="no-record">
+                                    <span class="empty-icon">📭</span>
+                                    <strong>No participation records found</strong>
+                                    Your event participation details will appear here when available.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+        <div class="bottom-actions">
+            <p class="bottom-note">
+                Student Performance Analysis and Management System
+            </p>
+
+            <a href="/student-dashboard" class="back-btn">
+                ← Back to Student Dashboard
+            </a>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        Student Performance Analysis and Management System
+    </footer>
+
+</body>
+</html>

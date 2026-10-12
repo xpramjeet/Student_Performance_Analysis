@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Overall Student Performance</title>
+
+    <style>
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.summary-box {
+    padding: 20px;
+    border-radius: 12px;
+    background: #f5f7fa;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.summary-box h3 {
+    margin-bottom: 10px;
+}
+
+.summary-value {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.suggestion {
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        /* HEADER */
+
+        .header {
+            background: #1f4e79;
+            color: white;
+            padding: 20px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 25px;
+        }
+
+        .back {
+            background: white;
+            color: #1f4e79;
+            text-decoration: none;
+
+            padding: 10px 18px;
+            border-radius: 6px;
+
+            font-weight: bold;
+        }
+
+        /* CONTAINER */
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        /* SELECT */
+
+        .selection-card {
+            background: white;
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+
+            margin-bottom: 25px;
+        }
+
+        .selection-card h2 {
+            color: #1f4e79;
+            margin-bottom: 18px;
+        }
+
+        .selection-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        select {
+            flex: 1;
+            min-width: 250px;
+
+            padding: 12px;
+
+            border: 1px solid #ccc;
+            border-radius: 6px;
+
+            font-size: 15px;
+        }
+
+        .btn {
+            background: #1f4e79;
+            color: white;
+
+            border: none;
+
+            padding: 12px 25px;
+
+            border-radius: 6px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #163a5c;
+        }
+
+        /* STUDENT */
+
+        .student-card {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+
+            margin-bottom: 25px;
+        }
+
+        .student-card h2 {
+            color: #1f4e79;
+            margin-bottom: 10px;
+        }
+
+        .student-info {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 15px;
+
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background: #f4f6f9;
+
+            padding: 15px;
+
+            border-radius: 7px;
+        }
+
+        .info-box span {
+            display: block;
+
+            color: #777;
+
+            font-size: 13px;
+
+            margin-bottom: 5px;
+        }
+
+        .info-box strong {
+            font-size: 17px;
+        }
+
+        /* PERFORMANCE */
+
+        .section-title {
+            color: #1f4e79;
+
+            margin: 25px 0 15px;
+
+            border-bottom: 2px solid #1f4e79;
+
+            padding-bottom: 8px;
+        }
+
+        .performance-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 18px;
+        }
+
+        .performance-card {
+            background: white;
+
+            padding: 22px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+
+            text-align: center;
+        }
+
+        .performance-card h3 {
+            color: #666;
+
+            font-size: 15px;
+
+            margin-bottom: 12px;
+        }
+
+        .percentage {
+            font-size: 30px;
+
+            font-weight: bold;
+
+            color: #1f4e79;
+        }
+
+        /* OVERALL */
+
+        .overall-card {
+            background: #1f4e79;
+
+            color: white;
+
+            padding: 30px;
+
+            border-radius: 10px;
+
+            text-align: center;
+
+            margin-top: 25px;
+        }
+
+        .overall-card h2 {
+            margin-bottom: 15px;
+        }
+
+        .overall-number {
+            font-size: 45px;
+
+            font-weight: bold;
+        }
+
+        .grade {
+            margin-top: 10px;
+
+            font-size: 22px;
+
+            font-weight: bold;
+        }
+
+        /* INDICATORS */
+
+        .indicator-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 18px;
+        }
+
+        .indicator {
+            background: white;
+
+            padding: 22px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+
+            text-align: center;
+        }
+
+        .indicator h3 {
+            color: #1f4e79;
+
+            margin-bottom: 10px;
+        }
+
+        .indicator-number {
+            font-size: 28px;
+
+            font-weight: bold;
+        }
+
+        /* EMPTY */
+
+        .empty {
+            background: white;
+
+            padding: 35px;
+
+            text-align: center;
+
+            border-radius: 10px;
+
+            color: #777;
+        }
+
+        /* FOOTER */
+
+        .footer {
+            margin-top: 40px;
+
+            background: #1f4e79;
+
+            color: white;
+
+            text-align: center;
+
+            padding: 18px;
+        }
+
+        @media(max-width: 600px) {
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .selection-form {
+                flex-direction: column;
+            }
+
+            select {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+<script>
+
+    const performanceChart =
+        document.getElementById(
+            "performanceChart"
+        ).getContext("2d");
+
+
+    new Chart(performanceChart, {
+
+        type: "bar",
+
+        data: {
+
+            labels: [
+                "Theory",
+                "Practical",
+                "Assignment",
+                "Attendance"
+            ],
+
+            datasets: [
+
+                {
+
+                    label: "Performance (%)",
+
+                    data: [
+                        {{ theory_percentage }},
+                        {{ practical_percentage }},
+                        {{ assignment_percentage }},
+                        {{ attendance_percentage }}
+                    ],
+
+                    borderWidth: 1
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    max: 100,
+
+                    title: {
+
+                        display: true,
+
+                        text: "Percentage"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+</script>
+
+
+<body>
+
+    <div class="overall-card">
+
+    <h2>
+        Overall Performance
+    </h2>
+
+    <div class="overall-number">
+
+        {{ overall_percentage }}%
+
+    </div>
+
+    <div class="grade">
+
+        Grade: {{ grade }}
+
+    </div>
+
+</div>
+
+
+<!-- HEADER -->
+
+<div class="header">
+
+    <div>
+
+        <h1>
+            Overall Student Performance
+        </h1>
+
+        <p>
+            Student Performance Analysis System
+        </p>
+
+    </div>
+
+    <a href="/dashboard" class="back">
+        ← Dashboard
+    </a>
+
+</div>
+
+
+
+<div class="container">
+
+
+    <!-- STUDENT SELECTION -->
+
+    <div class="selection-card">
+
+        <h2>
+            Select Student
+        </h2>
+
+        <form
+            method="GET"
+            action="/overall-performance"
+            class="selection-form"
+        >
+
+            <select
+                name="student_id"
+                required
+            >
+
+                <option value="">
+                    -- Select Student --
+                </option>
+
+                {% for s in students %}
+
+                <option
+                    value="{{ s.id }}"
+                    {% if student and student.id == s.id %}
+                    selected
+                    {% endif %}
+                >
+
+                    {{ s.roll_no }} -
+                    {{ s.student_name }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="btn"
+            >
+                View Performance
+            </button>
+
+        </form>
+
+    </div>
+
+
+
+    {% if student %}
+
+
+    <!-- STUDENT DETAILS -->
+
+    <div class="student-card">
+
+        <h2>
+            {{ student.student_name }}
+        </h2>
+
+        <p>
+            Student Academic Performance Summary
+        </p>
+
+
+        <div class="student-info">
+
+
+            <div class="info-box">
+
+                <span>
+                    Roll Number
+                </span>
+
+                <strong>
+                    {{ student.roll_no }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <span>
+                    Course
+                </span>
+
+                <strong>
+                    {{ student.course }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <span>
+                    Semester
+                </span>
+
+                <strong>
+                    {{ student.semester }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <span>
+                    Email
+                </span>
+
+                <strong>
+                    {{ student.email }}
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- PERFORMANCE -->
+
+    <h2 class="section-title">
+        Academic Performance
+    </h2>
+
+
+    <div class="performance-grid">
+
+
+        <!-- THEORY -->
+
+        <div class="performance-card">
+
+            <h3>
+                📚 Theory
+            </h3>
+
+            <div class="percentage">
+
+                {{ theory_percentage }}%
+
+            </div>
+
+        </div>
+
+
+        <!-- PRACTICAL -->
+
+        <div class="performance-card">
+
+            <h3>
+                🔬 Practical
+            </h3>
+
+            <div class="percentage">
+
+                {{ practical_percentage }}%
+
+            </div>
+
+        </div>
+
+
+        <!-- ASSIGNMENT -->
+
+        <div class="performance-card">
+
+            <h3>
+                📝 Assignment
+            </h3>
+
+            <div class="percentage">
+
+                {{ assignment_percentage }}%
+
+            </div>
+
+        </div>
+
+
+        <!-- ATTENDANCE -->
+
+        <div class="performance-card">
+
+            <h3>
+                📅 Attendance
+            </h3>
+
+            <div class="percentage">
+
+                {{ attendance_percentage }}%
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- OVERALL -->
+
+    <div class="overall-card">
+
+        <h2>
+            Overall Performance
+        </h2>
+
+        <div class="overall-number">
+
+            {{ overall_percentage }}%
+
+        </div>
+
+        <div class="grade">
+
+            Grade: {{ grade }}
+
+        </div>
+
+    </div>
+
+    <!-- Performance Status -->
+
+<div class="student-card">
+
+    <h2>Performance Summary</h2>
+
+    <div class="summary-grid">
+
+        <div class="summary-box">
+
+            <h3>Performance Status</h3>
+
+            <p class="summary-value">
+                {{ performance_status }}
+            </p>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <h3>Weak Area</h3>
+
+            <p class="summary-value">
+                {{ weak_area }}
+            </p>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <h3>Improvement Suggestion</h3>
+
+            <p class="suggestion">
+                {{ improvement_message }}
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+    <!-- ACTIVITY / PARTICIPATION -->
+
+    <h2 class="section-title">
+        Student Development Indicators
+    </h2>
+
+
+    <div class="indicator-grid">
+
+
+        <div class="indicator">
+
+            <h3>
+                🎯 Activities
+            </h3>
+
+            <div class="indicator-number">
+
+                {{ activity_count }}
+
+            </div>
+
+            <p>
+                Recorded activities
+            </p>
+
+        </div>
+
+
+        <div class="indicator">
+
+            <h3>
+                🏅 Participation
+            </h3>
+
+            <div class="indicator-number">
+
+                {{ participation_count }}
+
+            </div>
+
+            <p>
+                Events participated
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+    {% else %}
+
+
+    <!-- NO STUDENT -->
+
+    <div class="empty">
+
+        <h2>
+            Select a student
+        </h2>
+
+        <p>
+            Please select a student above to view
+            their overall performance.
+        </p>
+
+    </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+
+<!-- FOOTER -->
+
+<div class="footer">
+
+    <p>
+        Student Performance Analysis & Management System
+    </p>
+
+    <p>
+        BCA Minor Project | INMANTEC
+    </p>
+
+</div>
+
+
+</body>
+
+</html>

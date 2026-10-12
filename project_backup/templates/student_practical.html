@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Practical Marks</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+        }
+
+        .header {
+            background: #243f87;
+            color: white;
+            padding: 20px 40px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 85%;
+            margin: 60px auto;
+        }
+
+        h2 {
+            color: #243f87;
+            margin-bottom: 25px;
+        }
+
+        .table-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #243f87;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .percentage {
+            font-weight: bold;
+            color: #198754;
+        }
+
+        .no-record {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #243f87;
+            font-size: 17px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Student Performance Analysis System
+    </div>
+
+    <div class="container">
+
+        <h2>🧪 My Practical Marks</h2>
+
+        <div class="table-box">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Maximum Marks</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for record in practical %}
+
+                    <tr>
+
+                        <td>
+                            {{ record.subject }}
+                        </td>
+
+                        <td>
+                            {{ record.marks }}
+                        </td>
+
+                        <td>
+                            {{ record.max_marks }}
+                        </td>
+
+                        <td class="percentage">
+                            {% if record.max_marks > 0 %}
+                                {{ "%.2f"|format((record.marks / record.max_marks) * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="4" class="no-record">
+                            No practical marks found.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <a href="/student-dashboard" class="back">
+            ← Back to Student Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>

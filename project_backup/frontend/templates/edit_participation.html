@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Participation | Student Performance System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #2447a8;
+            --primary-dark: #18347f;
+            --background: #f3f6fc;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #dbe3f0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        .header {
+            background: linear-gradient(120deg, #172554, #2447a8, #3566d6);
+            color: white;
+            padding: 28px 5%;
+            box-shadow: 0 5px 18px rgba(23, 37, 84, 0.16);
+        }
+
+        .header h1 {
+            font-size: clamp(22px, 3vw, 30px);
+            line-height: 1.4;
+            margin-bottom: 7px;
+        }
+
+        .header p {
+            color: #dbeafe;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 760px;
+            margin: 35px auto;
+        }
+
+        .form-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            overflow: hidden;
+            box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .card-heading {
+            padding: 25px 28px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(to right, #fff, #f7f9ff);
+        }
+
+        .heading-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 13px;
+            border-radius: 13px;
+            background: #e8efff;
+            font-size: 24px;
+        }
+
+        .card-heading h2 {
+            color: #172554;
+            font-size: 24px;
+            margin-bottom: 7px;
+        }
+
+        .card-heading p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .form-body {
+            padding: 26px 28px 30px;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 17px;
+            margin-bottom: 26px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #f4f7ff;
+        }
+
+        .student-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 43px;
+            height: 43px;
+            border-radius: 11px;
+            background: #e0eaff;
+            font-size: 21px;
+        }
+
+        .student-details {
+            min-width: 0;
+        }
+
+        .student-details h3 {
+            color: #1e3a8a;
+            font-size: 15px;
+            margin-bottom: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .student-details p {
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        .student-details strong {
+            color: #334155;
+        }
+
+        .section-title {
+            color: #334155;
+            font-size: 15px;
+            margin-bottom: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 21px 20px;
+        }
+
+        .form-group {
+            min-width: 0;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        input,
+        textarea {
+            display: block;
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: #f8faff;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input {
+            min-height: 46px;
+        }
+
+        textarea {
+            min-height: 105px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(36, 71, 168, 0.11);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .field-hint {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 29px;
+            padding-top: 23px;
+            border-top: 1px solid #edf0f6;
+        }
+
+        .btn {
+            display: inline-flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 46px;
+            padding: 12px 16px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .update-btn {
+            background: linear-gradient(110deg, #2447a8, #3565cc);
+            color: white;
+            box-shadow: 0 5px 12px rgba(36, 71, 168, 0.17);
+        }
+
+        .update-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .cancel-btn {
+            background: white;
+            color: #475569;
+            border-color: var(--border);
+        }
+
+        .cancel-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .footer {
+            margin: 20px 0;
+            color: var(--muted);
+            text-align: center;
+            font-size: 12px;
+        }
+
+        a:focus-visible,
+        button:focus-visible {
+            outline: 3px solid #93c5fd;
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 94%;
+                margin: 22px auto;
+            }
+
+            .card-heading {
+                padding: 22px;
+            }
+
+            .form-body {
+                padding: 22px 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+
+            .card-heading h2 {
+                font-size: 21px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <h1>Student Performance Analysis and Management System</h1>
+        <p>Student Records &bull; Participation &amp; Achievements</p>
+    </header>
+
+    <main class="container">
+
+        <section class="form-card">
+
+            <div class="card-heading">
+                <div class="heading-icon" aria-hidden="true">🏆</div>
+
+                <h2>Edit Participation</h2>
+
+                <p>
+                    Update event details, participation level and achievements
+                    for the selected student.
+                </p>
+            </div>
+
+            <div class="form-body">
+
+                <div class="student-info">
+                    <div class="student-icon" aria-hidden="true">🎓</div>
+
+                    <div class="student-details">
+                        <h3>{{ participation.student_name }}</h3>
+
+                        <p>
+                            <strong>Roll Number:</strong>
+                            {{ participation.roll_no }}
+                        </p>
+
+                        <p>
+                            <strong>Record Type:</strong>
+                            Student Participation
+                        </p>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Event Information</h3>
+
+                <form method="POST">
+
+                    <div class="form-grid">
+
+                        <div class="form-group full-width">
+                            <label for="event_name">
+                                Event Name <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="event_name"
+                                name="event_name"
+                                value="{{ participation.event_name }}"
+                                placeholder="Enter event name"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="event_type">
+                                Event Type <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="event_type"
+                                name="event_type"
+                                value="{{ participation.event_type }}"
+                                placeholder="e.g. Sports, Cultural"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="participation_level">
+                                Participation Level <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="participation_level"
+                                name="participation_level"
+                                value="{{ participation.participation_level }}"
+                                placeholder="e.g. College, State"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="achievement">Achievement</label>
+
+                            <input
+                                type="text"
+                                id="achievement"
+                                name="achievement"
+                                value="{{ participation.achievement }}"
+                                placeholder="e.g. First Prize, Certificate"
+                            >
+
+                            <p class="field-hint">
+                                Leave blank if no specific achievement was recorded.
+                            </p>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="remarks">Remarks</label>
+
+                            <textarea
+                                id="remarks"
+                                name="remarks"
+                                placeholder="Add any additional details or remarks..."
+                            >{{ participation.remarks }}</textarea>
+                        </div>
+
+                    </div>
+
+                    <div class="buttons">
+                        <button type="submit" class="btn update-btn">
+                            &#10003; Update Participation
+                        </button>
+
+                        <a href="/participation" class="btn cancel-btn">
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+        </section>
+
+        <footer class="footer">
+            Student Performance Analysis and Management System
+        </footer>
+
+    </main>
+
+</body>
+</html>
+```

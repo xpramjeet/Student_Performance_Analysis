@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Accounts</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #243f87;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #243f87;
+            margin-top: 25px;
+        }
+
+        .message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        select,
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            background: #243f87;
+            color: white;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b316b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: #243f87;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .action-buttons {
+            white-space: nowrap;
+        }
+
+        .change-username {
+            background: #198754;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .change-username:hover {
+            background: #146c43;
+        }
+
+        .reset-password {
+            background: #243f87;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .reset-password:hover {
+            background: #1b316b;
+        }
+
+        .delete-account {
+            background: #dc3545;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .delete-account:hover {
+            background: #bb2d3b;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #243f87;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 800px) {
+
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 8px;
+            }
+
+            .action-buttons a {
+                display: block;
+                margin-bottom: 6px;
+                margin-right: 0;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>👨‍🎓 Student Account Management</h1>
+
+
+    <!-- Success Message -->
+
+    {% if message %}
+        <div class="message">
+            {{ message }}
+        </div>
+    {% endif %}
+
+
+    <!-- Error Message -->
+
+    {% if error %}
+        <div class="error">
+            {{ error }}
+        </div>
+    {% endif %}
+
+
+    <!-- Create Student Account -->
+
+    <h2>➕ Create Student Account</h2>
+
+    <form method="POST">
+
+        <label>Select Student</label>
+
+        <select name="student_id" required>
+
+            <option value="">
+                -- Select Student --
+            </option>
+
+            {% for student in students %}
+
+                <option value="{{ student.id }}">
+                    {{ student.student_name }}
+                    - Roll No: {{ student.roll_no }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <label>Username</label>
+
+        <input
+            type="text"
+            name="username"
+            placeholder="Enter username"
+            required
+        >
+
+
+        <label>Password</label>
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Enter password"
+            minlength="6"
+            required
+        >
+
+
+        <button type="submit">
+            Create Student Account
+        </button>
+
+    </form>
+
+
+    <!-- Existing Accounts -->
+
+    <h2>📋 Existing Student Accounts</h2>
+
+    {% if accounts %}
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Student Name</th>
+
+                <th>Roll No</th>
+
+                <th>Username</th>
+
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for account in accounts %}
+
+            <tr>
+
+                <td>
+                    {{ account.student_name }}
+                </td>
+
+                <td>
+                    {{ account.roll_no }}
+                </td>
+
+                <td>
+                    {{ account.username }}
+                </td>
+
+
+                <td class="action-buttons">
+
+
+                    <!-- Change Username -->
+
+                    <a
+                        href="/change-student-username/{{ account.id }}"
+                        class="change-username"
+                    >
+                        ✏️ Change Username
+                    </a>
+
+
+                    <!-- Reset Password -->
+
+                    <a
+                        href="/reset-student-password/{{ account.id }}"
+                        class="reset-password"
+                    >
+                        🔐 Reset Password
+                    </a>
+
+
+                    <!-- Delete Account -->
+
+                    <a
+                        href="/delete-student-account/{{ account.id }}"
+                        class="delete-account"
+                        onclick="return confirm(
+                            'Are you sure you want to delete this student account?'
+                        );"
+                    >
+                        🗑️ Delete
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+        <p>
+            No student accounts found.
+        </p>
+
+    {% endif %}
+
+
+    <!-- Back to Dashboard -->
+
+    <a
+        href="/dashboard"
+        class="back"
+    >
+        ← Back to Admin Dashboard
+    </a>
+
+</div>
+
+</body>
+</html>

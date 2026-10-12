@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Activity</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+        }
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1f3c88;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d6dbe5;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 25px;
+            width: 100%;
+            padding: 13px;
+            background: #1f3c88;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #17306f;
+        }
+
+        .back {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: #1f3c88;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>
+            Student Performance Analysis and Management System
+        </h1>
+
+    </div>
+
+    <div class="container">
+
+        <h2>
+            Add Student Activity
+        </h2>
+
+        <form method="POST">
+
+            <label>
+                Select Student
+            </label>
+
+            <select name="student_id" required>
+
+                <option value="">
+                    -- Select Student --
+                </option>
+
+                {% for student in students %}
+
+                    <option value="{{ student.id }}">
+
+                        {{ student.roll_no }}
+                        -
+                        {{ student.student_name }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <label>
+                Activity Name
+            </label>
+
+            <input
+                type="text"
+                name="activity_name"
+                placeholder="Example: Coding Club"
+                required
+            >
+
+
+            <label>
+                Activity Type
+            </label>
+
+            <select name="activity_type" required>
+
+                <option value="">
+                    -- Select Activity Type --
+                </option>
+
+                <option value="Academic">
+                    Academic
+                </option>
+
+                <option value="Co-Curricular">
+                    Co-Curricular
+                </option>
+
+                <option value="Extra-Curricular">
+                    Extra-Curricular
+                </option>
+
+                <option value="Sports">
+                    Sports
+                </option>
+
+                <option value="Cultural">
+                    Cultural
+                </option>
+
+                <option value="Technical">
+                    Technical
+                </option>
+
+                <option value="Other">
+                    Other
+                </option>
+
+            </select>
+
+
+            <label>
+                Performance
+            </label>
+
+            <select name="performance" required>
+
+                <option value="">
+                    -- Select Performance --
+                </option>
+
+                <option value="Excellent">
+                    Excellent
+                </option>
+
+                <option value="Very Good">
+                    Very Good
+                </option>
+
+                <option value="Good">
+                    Good
+                </option>
+
+                <option value="Average">
+                    Average
+                </option>
+
+                <option value="Needs Improvement">
+                    Needs Improvement
+                </option>
+
+            </select>
+
+
+            <label>
+                Remarks
+            </label>
+
+            <textarea
+                name="remarks"
+                placeholder="Enter teacher/admin remarks"
+            ></textarea>
+
+
+            <button type="submit">
+                Save Activity
+            </button>
+
+        </form>
+
+        <a href="/activities" class="back">
+            ← View Activity Records
+        </a>
+
+        <a href="/dashboard" class="back">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</body>
+
+</html>
